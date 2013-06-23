@@ -1,22 +1,36 @@
 this.UserSockets = new Meteor.Collection(null)
 
-# Publication is guaranteed to be called once per connection
-# trick as referenced in http://stackoverflow.com/q/10257958/586086
+# pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
 Meteor.publish "statusWatcher", ->
   id = @_session.userId
-  return unless id?
+  return unless @_session.socket?
   sockId = @_session.socket.id
 
-  # Add socket to open connections
-  Meteor.bindEnvironment ->
-    UserSockets.insert
-      userId: id
+  # Untrack connection on logout
+  unless id?
+    # TODO: this could be replaced with a findAndModify once it's supported on Collections
+    existing = UserSockets.findOne
       sockId: sockId
-  , (e) ->
-    Meteor._debug "Exception from connection add callback:", e
+    return unless existing? # Probably new session
+
+    id = existing.userId
+    UserSockets.remove
+      sockId: sockId
+
+    if UserSockets.find(userId: id).count() is 0
+      Meteor.users.update id,
+        $set: {'profile.online': false}
+    return
+
+  # Add socket to open connections
+  UserSockets.insert
+    userId: id
+    sockId: sockId
+  Meteor.users.update id,
+    $set: {'profile.online': true}
 
   # Remove socket on close
-  @_session.socket.on "close", Meteor.bindEnvironment( ->
+  @_session.socket.on "close", Meteor.bindEnvironment ->
     UserSockets.remove
       userId: id
       sockId: sockId
@@ -24,7 +38,7 @@ Meteor.publish "statusWatcher", ->
     if UserSockets.find(userId: id).count() is 0
       Meteor.users.update id,
         $set: {'profile.online': false}
-
   , (e) ->
     Meteor._debug "Exception from connection close callback:", e
-  )
+
+  return
