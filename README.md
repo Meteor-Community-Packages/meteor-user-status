@@ -25,3 +25,5 @@ Or, if you are already pushing all users to the client, use a reactive template:
 Template.foo.usersOnline = ->
   Meteor.users.find({ "profile.online": true })
 ```
+
+Check out https://github.com/mizzao/meteor-accounts-testing for a simple accounts drop-in that you can use to test your app.
