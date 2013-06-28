@@ -1,43 +1,41 @@
-this.UserSockets = new Meteor.Collection(null)
+# We may want to make this a server collection to take advantage of indices
+this.UserSessions = new Meteor.Collection(null)
+
+removeSession = (userId, sessionId) ->
+  UserSessions.remove
+    sessionId: sessionId
+
+  if UserSessions.find(userId: userId).count() is 0
+    Meteor.users.update userId,
+      $set: {'profile.online': false}
 
 # pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
 Meteor.publish "statusWatcher", ->
-  id = @_session.userId
+  userId = @_session.userId
   return unless @_session.socket?
-  sockId = @_session.socket.id
+  sessionId = @_session.id
 
   # Untrack connection on logout
-  unless id?
+  unless userId?
     # TODO: this could be replaced with a findAndModify once it's supported on Collections
-    existing = UserSockets.findOne
-      sockId: sockId
+    existing = UserSessions.findOne
+      sessionId: sessionId
     return unless existing? # Probably new session
 
-    id = existing.userId
-    UserSockets.remove
-      sockId: sockId
-
-    if UserSockets.find(userId: id).count() is 0
-      Meteor.users.update id,
-        $set: {'profile.online': false}
+    removeSession(existing.userId, sessionId)
     return
 
   # Add socket to open connections
-  UserSockets.insert
-    userId: id
-    sockId: sockId
-  Meteor.users.update id,
+  UserSessions.insert
+    userId: userId
+    sessionId: sessionId
+
+  Meteor.users.update userId,
     $set: {'profile.online': true}
 
   # Remove socket on close
   @_session.socket.on "close", Meteor.bindEnvironment ->
-    UserSockets.remove
-      userId: id
-      sockId: sockId
-
-    if UserSockets.find(userId: id).count() is 0
-      Meteor.users.update id,
-        $set: {'profile.online': false}
+    removeSession(userId, sessionId)
   , (e) ->
     Meteor._debug "Exception from connection close callback:", e
 
