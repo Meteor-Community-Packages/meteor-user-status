@@ -26,4 +26,29 @@ Template.foo.usersOnline = ->
   Meteor.users.find({ "profile.online": true })
 ```
 
+## Advanced Usage
+
+The `UserSessions` (anonymous) collection contains a `userId` and `ipAddr` field for each logged in session.
+You can use this to check the IP address of any connected user. We don't keep this in `Meteor.users` because that would
+incur extra database hits and require unnecessary additional cleanup.
+
+The `UserStatus` object is an `EventEmitter` on which you can listen for sessions logging in and out.
+Logging out includes closing the browser; opening the browser will trigger a new login event.
+
+```
+UserStatus.on "sessionLogin", (userId, sessionId, ipAddr) ->
+  console.log(userId + " with session " + sessionId + " logged in from " + ipAddr)
+
+UserStatus.on "sessionLogout", (userId, sessionId) ->
+  console.log(userId + " with session " + sessionId + " logged out")
+```
+
+This will print out stuff like the following:
+```
+RsuCmaNLa6CXAR9dS with session t6acwNizuWuJdL8rC logged in from 192.168.56.1
+Rrp6yezq9iZJhipg3 with session TPnT28aCnaQGzavay logged in from 192.168.56.1
+Rrp6yezq9iZJhipg3 with session TPnT28aCnaQGzavay logged out
+Rrp6yezq9iZJhipg3 with session XReS3mqDZEKD9tTKW logged in from 192.168.56.1
+```
+
 Check out https://github.com/mizzao/meteor-accounts-testing for a simple accounts drop-in that you can use to test your app.
