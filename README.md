@@ -1,6 +1,6 @@
 # meteor-user-status
 
-Keeps track of user connection state and makes this available in `Meteor.users`.
+Keeps track of user connection state and makes this available in `Meteor.users` as well as some other objects.
 
 ## Usage
 
@@ -28,7 +28,7 @@ Template.foo.usersOnline = ->
 
 ## Advanced Usage
 
-The `UserSessions` (anonymous) collection contains a `userId` and `ipAddr` field for each logged in session.
+The `UserSessions` (anonymous) collection contains a `userId` and `ipAddr` field for each logged in session (stored in `_id`).
 You can use this to check the IP address of any connected user. We don't keep this in `Meteor.users` because that would
 incur extra database hits and require unnecessary additional cleanup.
 
