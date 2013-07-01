@@ -11,12 +11,23 @@ $ mrt add user-status
 The `profile.online` field will be updated automatically if the user logs in or logs out, closes their browser, or otherwise disconnects.
  (anonymous users are not tracked.)
 
-To use this reactively, you can create a publication on the server:
+Use a reactive cursor, such as by creating a publication on the server:
 
 ```coffeescript
 Meteor.publish "userStatus", ->
   Meteor.users.find { "profile.online": true },
     fields: { ... }
+```
+
+or you can use this to do things when users go online and offline (however, usually you should just be as reactive as possible):
+
+```coffeescript
+Meteor.users.find({ "profile.online": true }).observe
+  added: (id) ->
+    # id just came online
+    
+  removed: (id) ->
+    # id just went offline
 ```
 
 Or, if you are already pushing all users to the client, use a reactive template:
@@ -35,7 +46,7 @@ incur extra database hits and require unnecessary additional cleanup.
 The `UserStatus` object is an `EventEmitter` on which you can listen for sessions logging in and out.
 Logging out includes closing the browser; opening the browser will trigger a new login event.
 
-```
+```coffeescript
 UserStatus.on "sessionLogin", (userId, sessionId, ipAddr) ->
   console.log(userId + " with session " + sessionId + " logged in from " + ipAddr)
 
