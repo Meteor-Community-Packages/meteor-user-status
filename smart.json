@@ -3,7 +3,7 @@
   "description": "User connection and status tracking for meteor",
   "homepage": "https://github.com/mizzao/meteor-user-status",
   "author": "Andrew Mao  (http://www.andrewmao.net)",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "git": "https://github.com/mizzao/meteor-user-status.git",
   "packages": {}
 }

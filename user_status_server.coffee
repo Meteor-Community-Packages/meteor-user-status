@@ -12,6 +12,12 @@ removeSession = (userId, sessionId) ->
     Meteor.users.update userId,
       $set: {'profile.online': false}
 
+# Clear any online users on startup (they will re-add themselves)
+Meteor.startup ->
+  Meteor.users.update {},
+    $unset: { "profile.online": null }
+  , {multi: true}
+
 # pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
 Meteor.publish "statusWatcher", ->
   userId = @_session.userId
