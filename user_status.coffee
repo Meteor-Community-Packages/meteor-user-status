@@ -19,7 +19,7 @@ Meteor.startup ->
   , {multi: true}
 
 # pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
-Meteor.publish "statusWatcher", ->
+Meteor.publish null, ->
   userId = @_session.userId
   return unless @_session.socket?
   sessionId = @_session.id
