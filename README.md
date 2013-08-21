@@ -4,6 +4,7 @@ Keeps track of user connection state and makes this available in `Meteor.users` 
 
 ## Usage
 
+*You must have [Meteorite package manager](https://github.com/oortcloud/meteorite) installed to run the command below*
 ```sh
 $ mrt add user-status
 ```
