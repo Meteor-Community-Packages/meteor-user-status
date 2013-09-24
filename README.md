@@ -2,9 +2,16 @@
 
 Keeps track of user connection state and makes this available in `Meteor.users` as well as some other objects.
 
+## What's this do?
+
+Tracks users that are online and allows you to use them in useful ways, such as rendering the users online box below showing yourself in orange and other online users in green:
+
+![User online states](https://raw.github.com/mizzao/meteor-user-status/master/docs/example.png)
+
 ## Usage
 
-*You must have [Meteorite package manager](https://github.com/oortcloud/meteorite) installed to run the command below*
+Install the smart package using **[meteorite](https://github.com/oortcloud/meteorite)**:
+
 ```sh
 $ mrt add user-status
 ```
@@ -31,11 +38,28 @@ Meteor.users.find({ "profile.online": true }).observe
     # id just went offline
 ```
 
-Or, if you are already pushing all users to the client, use a reactive template:
+You can use a reactive cursor to select online users either in a `publish` function or a template helper:
 
 ```coffeescript
 Template.foo.usersOnline = ->
   Meteor.users.find({ "profile.online": true })
+```
+
+Making this directly available on the client allows for useful template renderings of user state. For example, with something like the following you get the picture above (using bootstrap classes).
+
+```
+<template name="userPill">
+    <span class="label {{labelClass}}">{{username}}</span>
+</template>
+```
+
+```coffeescript
+Template.userPill.labelClass = ->
+  if @_id is Meteor.userId()
+    "label-warning"
+  else if @profile?.online
+    "label-success"
+  else ""
 ```
 
 ## Advanced Usage
