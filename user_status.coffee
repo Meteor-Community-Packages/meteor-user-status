@@ -36,10 +36,20 @@ Meteor.publish null, ->
 
   # Add socket to open connections
   ipAddr = @_session.socket.headers?['x-forwarded-for'] || @_session.socket.remoteAddress
-  UserSessions.insert
-    _id: sessionId
-    userId: userId
-    ipAddr: ipAddr
+  ###
+    TODO serious bug here when sessionId already exists in local collection
+    Happens when userId exists but session has already been recorded with the same sessionId
+  ###
+  if UserSessions.findOne(sessionId)
+    UserSessions.update sessionId,
+      userId: userId
+      ipAddr: ipAddr
+  else
+    # Only this part should actually be necessary
+    UserSessions.insert
+      _id: sessionId
+      userId: userId
+      ipAddr: ipAddr
   UserStatus.emit("sessionLogin", userId, sessionId, ipAddr)
 
   Meteor.users.update userId,
