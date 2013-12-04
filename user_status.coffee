@@ -4,13 +4,13 @@ this.UserSessions = new Meteor.Collection(null)
 this.UserStatus = new (Npm.require('events').EventEmitter)()
 
 removeSession = (userId, sessionId) ->
-  UserSessions.remove
-    _id: sessionId
+  UserSessions.remove(sessionId)
   UserStatus.emit("sessionLogout", userId, sessionId)
 
   if UserSessions.find(userId: userId).count() is 0
     Meteor.users.update userId,
       $set: {'profile.online': false}
+  return
 
 # Clear any online users on startup (they will re-add themselves)
 Meteor.startup ->
@@ -27,8 +27,7 @@ Meteor.publish null, ->
   # Untrack connection on logout
   unless userId?
     # TODO: this could be replaced with a findAndModify once it's supported on Collections
-    existing = UserSessions.findOne
-      _id: sessionId
+    existing = UserSessions.findOne(sessionId)
     return unless existing? # Probably new session
 
     removeSession(existing.userId, sessionId)
@@ -38,12 +37,11 @@ Meteor.publish null, ->
   ipAddr = @_session.socket.headers?['x-forwarded-for'] || @_session.socket.remoteAddress
 
   # Hopefully no more duplicate key bug when using upsert!
-  UserSessions.upsert
-    _id: sessionId
-  ,
-    userId: userId
-    ipAddr: ipAddr
-    
+  UserSessions.upsert sessionId,
+    $set:
+      userId: userId
+      ipAddr: ipAddr
+
   UserStatus.emit("sessionLogin", userId, sessionId, ipAddr)
 
   Meteor.users.update userId,
