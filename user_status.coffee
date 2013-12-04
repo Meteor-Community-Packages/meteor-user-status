@@ -36,10 +36,8 @@ Meteor.publish null, ->
 
   # Add socket to open connections
   ipAddr = @_session.socket.headers?['x-forwarded-for'] || @_session.socket.remoteAddress
-  ###
-    TODO serious bug here when sessionId already exists in local collection
-    Happens when userId exists but session has already been recorded with the same sessionId
-  ###
+
+  # Hopefully no more duplicate key bug when using upsert!
   UserSessions.upsert
     _id: sessionId
   ,

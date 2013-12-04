@@ -88,3 +88,9 @@ Rrp6yezq9iZJhipg3 with session XReS3mqDZEKD9tTKW logged in from 192.168.56.1
 ```
 
 Check out https://github.com/mizzao/meteor-accounts-testing for a simple accounts drop-in that you can use to test your app.
+
+## Contributors
+
+* Andrew Mao (https://github.com/mizzao/)
+* Rafael Sales (https://github.com/rafaelsales)
+* Jonathan James (https://github.com/jonjamz)
