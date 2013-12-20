@@ -1,7 +1,12 @@
-# We may want to make this a server collection to take advantage of indices
-this.UserSessions = new Meteor.Collection(null)
+###
+  Apparently, the new api.export takes care of issues here. No need to attach to global namespace.
+  See http://shiggyenterprises.wordpress.com/2013/09/09/meteor-packages-in-coffeescript-0-6-5/
 
-this.UserStatus = new (Npm.require('events').EventEmitter)()
+  We may want to make UserSessions a server collection to take advantage of indices.
+###
+UserSessions = new Meteor.Collection(null)
+
+UserStatus = new (Npm.require('events').EventEmitter)()
 
 removeSession = (userId, sessionId) ->
   UserSessions.remove(sessionId)

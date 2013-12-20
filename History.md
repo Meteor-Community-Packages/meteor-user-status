@@ -1,3 +1,7 @@
+## vNEXT
+
+* Exported `UserStatus` and `UserSessions` using the new API.
+
 ## v0.1.7
 
 * Fixed a nuanced bug with the use of `upsert`.
