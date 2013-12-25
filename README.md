@@ -4,7 +4,7 @@ Keeps track of user connection state and makes this available in `Meteor.users` 
 
 ## What's this do?
 
-Tracks users that are online and allows you to use them in useful ways, such as rendering the users online box below showing yourself in orange and other online users in green:
+Tracks users that are online and allows you to use them in useful ways, such as rendering the users online box below showing yourself in orange and other online users in green. Also keeps track of the last time a user logged in, and the time login occurred in the current user session:
 
 ![User online states](https://raw.github.com/mizzao/meteor-user-status/master/docs/example.png)
 
@@ -45,6 +45,10 @@ Template.foo.usersOnline = ->
   Meteor.users.find({ "profile.online": true })
 ```
 
+Having the last login time for the session allows you to filter time-stamped information in your data based on when the session was established. (for example, only show chat messages that occurred after the current session was established).
+
+Having the last login time in the user profile allows for things like a "last login" field in a user listing, or for filtering based on recent logins.
+
 Making this directly available on the client allows for useful template renderings of user state. For example, with something like the following you get the picture above (using bootstrap classes).
 
 ```
@@ -64,16 +68,16 @@ Template.userPill.labelClass = ->
 
 ## Advanced Usage
 
-The `UserSessions` (anonymous) collection contains a `userId` and `ipAddr` field for each logged in session (stored in `_id`).
-You can use this to check the IP address of any connected user. We don't keep this in `Meteor.users` because that would
-incur extra database hits and require unnecessary additional cleanup.
+The `UserSessions` (anonymous) collection contains `userId`, `ipAddr` and `lastLogin` fields for each logged in session (stored in `_id`).
+You can use this to check the IP address of any connected user. We don't keep `ipAddr` in `Meteor.users` because that would
+incur extra database hits and require unnecessary additional cleanup.  We do, however, update the `lastLogin` time in the profile for new sessions.
 
 The `UserStatus` object is an `EventEmitter` on which you can listen for sessions logging in and out.
 Logging out includes closing the browser; opening the browser will trigger a new login event.
 
 ```coffeescript
 UserStatus.on "sessionLogin", (userId, sessionId, ipAddr) ->
-  console.log(userId + " with session " + sessionId + " logged in from " + ipAddr)
+  console.log(userId + " with session " + sessionId + " logged in from " + ipAddr + " at " + lastLogin)
 
 UserStatus.on "sessionLogout", (userId, sessionId) ->
   console.log(userId + " with session " + sessionId + " logged out")
@@ -81,10 +85,10 @@ UserStatus.on "sessionLogout", (userId, sessionId) ->
 
 This will print out stuff like the following:
 ```
-RsuCmaNLa6CXAR9dS with session t6acwNizuWuJdL8rC logged in from 192.168.56.1
-Rrp6yezq9iZJhipg3 with session TPnT28aCnaQGzavay logged in from 192.168.56.1
+RsuCmaNLa6CXAR9dS with session t6acwNizuWuJdL8rC logged in from 192.168.56.1 at 1388010994212
+Rrp6yezq9iZJhipg3 with session TPnT28aCnaQGzavay logged in from 192.168.56.1 at 1388011029663
 Rrp6yezq9iZJhipg3 with session TPnT28aCnaQGzavay logged out
-Rrp6yezq9iZJhipg3 with session XReS3mqDZEKD9tTKW logged in from 192.168.56.1
+Rrp6yezq9iZJhipg3 with session XReS3mqDZEKD9tTKW logged in from 192.168.56.1 at 1388011040873
 ```
 
 Check out https://github.com/mizzao/meteor-accounts-testing for a simple accounts drop-in that you can use to test your app.
@@ -94,3 +98,4 @@ Check out https://github.com/mizzao/meteor-accounts-testing for a simple account
 * Andrew Mao (https://github.com/mizzao/)
 * Rafael Sales (https://github.com/rafaelsales)
 * Jonathan James (https://github.com/jonjamz)
+* Kirk Stork (https://github.com/kastork)
