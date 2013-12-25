@@ -28,7 +28,8 @@ Meteor.publish null, ->
   userId = @_session.userId
   return unless @_session.socket?
   sessionId = @_session.id
-
+  dateMs = new Date().getTime()
+  
   # Untrack connection on logout
   unless userId?
     # TODO: this could be replaced with a findAndModify once it's supported on Collections
@@ -46,11 +47,12 @@ Meteor.publish null, ->
     $set:
       userId: userId
       ipAddr: ipAddr
+      loginTime: dateMs
 
-  UserStatus.emit("sessionLogin", userId, sessionId, ipAddr)
+  UserStatus.emit("sessionLogin", userId, sessionId, ipAddr, dateMs)
 
   Meteor.users.update userId,
-    $set: {'profile.online': true}
+    $set: {'profile.online': true, 'lastLogin': dateMs}
 
   # Remove socket on close
   @_session.socket.on "close", Meteor.bindEnvironment ->
