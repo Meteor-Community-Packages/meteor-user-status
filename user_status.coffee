@@ -52,7 +52,7 @@ Meteor.publish null, ->
   UserStatus.emit("sessionLogin", userId, sessionId, ipAddr, dateMs)
 
   Meteor.users.update userId,
-    $set: {'profile.online': true, 'lastLogin': dateMs}
+    $set: {'profile.online': true, 'profile.lastLogin': dateMs}
 
   # Remove socket on close
   @_session.socket.on "close", Meteor.bindEnvironment ->
