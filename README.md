@@ -16,21 +16,21 @@ Install the smart package using **[meteorite](https://github.com/oortcloud/meteo
 $ mrt add user-status
 ```
 
-The `profile.online` field will be updated automatically if the user logs in or logs out, closes their browser, or otherwise disconnects.
+The `status.online` field will be updated automatically if the user logs in or logs out, closes their browser, or otherwise disconnects.
  (anonymous users are not tracked.)
 
 Use a reactive cursor, such as by creating a publication on the server:
 
 ```coffeescript
 Meteor.publish "userStatus", ->
-  Meteor.users.find { "profile.online": true },
+  Meteor.users.find { "status.online": true },
     fields: { ... }
 ```
 
 or you can use this to do things when users go online and offline (however, usually you should just be as reactive as possible):
 
 ```coffeescript
-Meteor.users.find({ "profile.online": true }).observe
+Meteor.users.find({ "status.online": true }).observe
   added: (id) ->
     # id just came online
     
@@ -42,12 +42,8 @@ You can use a reactive cursor to select online users either in a `publish` funct
 
 ```coffeescript
 Template.foo.usersOnline = ->
-  Meteor.users.find({ "profile.online": true })
+  Meteor.users.find({ "status.online": true })
 ```
-
-Having the last login time for the session allows you to filter time-stamped information in your data based on when the session was established. (for example, only show chat messages that occurred after the current session was established).
-
-Having the last login time in the user profile allows for things like a "last login" field in a user listing, or for filtering based on recent logins.
 
 Making this directly available on the client allows for useful template renderings of user state. For example, with something like the following you get the picture above (using bootstrap classes).
 
@@ -61,7 +57,7 @@ Making this directly available on the client allows for useful template renderin
 Template.userPill.labelClass = ->
   if @_id is Meteor.userId()
     "label-warning"
-  else if @profile?.online
+  else if @status?.online
     "label-success"
   else ""
 ```
@@ -99,3 +95,4 @@ Check out https://github.com/mizzao/meteor-accounts-testing for a simple account
 * Rafael Sales (https://github.com/rafaelsales)
 * Jonathan James (https://github.com/jonjamz)
 * Kirk Stork (https://github.com/kastork)
+* Markus Gattol (https://github.com/markusgattol)
