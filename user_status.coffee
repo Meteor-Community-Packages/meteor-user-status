@@ -14,13 +14,13 @@ removeSession = (userId, sessionId) ->
 
   if UserSessions.find(userId: userId).count() is 0
     Meteor.users.update userId,
-      $set: {'profile.online': false}
+      $set: {'status.online': false}
   return
 
 # Clear any online users on startup (they will re-add themselves)
 Meteor.startup ->
   Meteor.users.update {},
-    $unset: { "profile.online": null }
+    $unset: { "status.online": null }
   , {multi: true}
 
 # pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
@@ -28,7 +28,8 @@ Meteor.publish null, ->
   userId = @_session.userId
   return unless @_session.socket?
   sessionId = @_session.id
-
+  dateMs = new Date().getTime()
+  
   # Untrack connection on logout
   unless userId?
     # TODO: this could be replaced with a findAndModify once it's supported on Collections
@@ -46,11 +47,12 @@ Meteor.publish null, ->
     $set:
       userId: userId
       ipAddr: ipAddr
+      loginTime: dateMs
 
-  UserStatus.emit("sessionLogin", userId, sessionId, ipAddr)
+  UserStatus.emit("sessionLogin", userId, sessionId, ipAddr, dateMs)
 
   Meteor.users.update userId,
-    $set: {'profile.online': true}
+    $set: {'status.online': true, 'status.lastLogin': dateMs}
 
   # Remove socket on close
   @_session.socket.on "close", Meteor.bindEnvironment ->
