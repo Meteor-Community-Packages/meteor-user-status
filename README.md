@@ -66,17 +66,17 @@ Template.userPill.labelClass = ->
 
 The `UserSessions` (anonymous) collection contains `userId`, `ipAddr` and `lastLogin` fields for each logged in session (stored in `_id`).
 You can use this to check the IP address of any connected user. We don't keep `ipAddr` in `Meteor.users` because that would
-incur extra database hits and require unnecessary additional cleanup.  We do, however, update the `lastLogin` time in the profile for new sessions.
+incur extra database hits and require unnecessary additional cleanup.  We do, however, update the `lastLogin` time in the `status` field for new sessions, which is the most recent time that a user logged in.
 
 The `UserStatus` object is an `EventEmitter` on which you can listen for sessions logging in and out.
-Logging out includes closing the browser; opening the browser will trigger a new login event.
+Logging out includes closing the browser; reopening the browser will trigger a new login event.
 
 ```coffeescript
-UserStatus.on "sessionLogin", (userId, sessionId, ipAddr) ->
-  console.log(userId + " with session " + sessionId + " logged in from " + ipAddr + " at " + lastLogin)
+UserStatus.on "sessionLogin", (advice) ->
+  console.log(advice.userId + " with session " + advice.sessionId + " logged in from " + advice.ipAddr + " at " + advice.lastLogin)
 
-UserStatus.on "sessionLogout", (userId, sessionId) ->
-  console.log(userId + " with session " + sessionId + " logged out")
+UserStatus.on "sessionLogout", (advice) ->
+  console.log(advice.userId + " with session " + advice.sessionId + " logged out")
 ```
 
 This will print out stuff like the following:

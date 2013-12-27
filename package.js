@@ -3,8 +3,8 @@ Package.describe({
 });
 
 Package.on_use( function(api) {
-    api.use('accounts-base', ['client','server']);
-    api.use('coffeescript', 'server');
+    api.use('accounts-base');
+    api.use('coffeescript');
     api.add_files('user_status.coffee', 'server');
 
     api.export(['UserSessions', 'UserStatus'], 'server');
@@ -12,8 +12,14 @@ Package.on_use( function(api) {
 
 Package.on_test( function(api) {
     api.use('user-status');
+
+    // Why do we have to repeat ourselves here
+    api.use(['accounts-base', 'accounts-password']);
+    api.use('coffeescript');
+
     api.use('test-helpers');
     api.use('tinytest');
 
-    // TODO add test cases
+    api.add_files("tests/insecure_login.js");
+    api.add_files('tests/status_tests.coffee');
 });
