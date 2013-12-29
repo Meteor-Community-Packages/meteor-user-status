@@ -13,7 +13,7 @@ Package.on_use( function(api) {
 Package.on_test( function(api) {
     api.use('user-status');
 
-    // Why do we have to repeat ourselves here
+    // Why do we have to repeat ourselves here, and not able to use api.imply?
     api.use(['accounts-base', 'accounts-password']);
     api.use('coffeescript');
 
