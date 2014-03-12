@@ -96,3 +96,5 @@ Check out https://github.com/mizzao/meteor-accounts-testing for a simple account
 * Jonathan James (https://github.com/jonjamz)
 * Kirk Stork (https://github.com/kastork)
 * Markus Gattol (https://github.com/markusgattol)
+
+If you found this package useful, I gratefully accept donations at [Gittip](https://www.gittip.com/mizzao/).
