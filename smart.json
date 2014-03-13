@@ -5,5 +5,7 @@
   "author": "Andrew Mao  (http://www.andrewmao.net)",
   "version": "0.2.0",
   "git": "https://github.com/mizzao/meteor-user-status.git",
-  "packages": {}
+  "packages": {
+      "timesync": {}
+  }
 }

@@ -8,13 +8,15 @@ Tracks users that are online and allows you to use them in useful ways, such as 
 
 ![User online states](https://raw.github.com/mizzao/meteor-user-status/master/docs/example.png)
 
-## Usage
+## Install
 
 Install the smart package using **[meteorite](https://github.com/oortcloud/meteorite)**:
 
 ```sh
 $ mrt add user-status
 ```
+
+## Usage
 
 The `status.online` field will be updated automatically if the user logs in or logs out, closes their browser, or otherwise disconnects.
  (anonymous users are not tracked.)

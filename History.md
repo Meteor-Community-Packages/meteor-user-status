@@ -1,3 +1,8 @@
+## vNEXT
+
+* Export a single `UserStatus` variable on the server and the client, that contains all operations. **Breaks compatibility with previous usage:** the previous `UserStatus` variable is now `UserStatus.events`.
+* Added optional automatic idle monitoring on the client, which is reported to the server.
+
 ## v0.2.0
 
 * Exported `UserStatus` and `UserSessions` using the new API.

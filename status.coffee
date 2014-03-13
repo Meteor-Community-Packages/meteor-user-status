@@ -7,11 +7,11 @@
 ###
 UserSessions = new Meteor.Collection(null)
 
-UserStatus = new (Npm.require('events').EventEmitter)()
+statusEvents = new (Npm.require('events').EventEmitter)()
 
 removeSession = (userId, sessionId) ->
   UserSessions.remove(sessionId)
-  UserStatus.emit "sessionLogout",
+  statusEvents.emit "sessionLogout",
     userId: userId
     sessionId: sessionId
 
@@ -55,7 +55,7 @@ Meteor.publish null, ->
       loginTime: timestamp
     }
 
-  UserStatus.emit "sessionLogin",
+  statusEvents.emit "sessionLogin",
     userId: userId
     sessionId: sessionId
     ipAddr: ipAddr
@@ -74,3 +74,7 @@ Meteor.publish null, ->
     Meteor._debug "Exception from connection close callback:", e
 
   return
+
+UserStatus =
+  sessions: UserSessions
+  events: statusEvents

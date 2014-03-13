@@ -5,9 +5,15 @@ Package.describe({
 Package.on_use( function(api) {
     api.use('accounts-base');
     api.use('coffeescript');
-    api.add_files('user_status.coffee', 'server');
 
-    api.export(['UserSessions', 'UserStatus'], 'server');
+    api.use('deps', 'client');
+
+    api.use('timesync'); // For accurate idle measurements
+
+    api.add_files('monitor.coffee', 'client');
+    api.add_files('status.coffee', 'server');
+
+    api.export('UserStatus');
 });
 
 Package.on_test( function(api) {
