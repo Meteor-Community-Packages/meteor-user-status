@@ -11,48 +11,68 @@
 # TODO: catch window blur events where supported
 
 monitorId = null
+idleThreshold = null
+
+inactiveDep = new Deps.Dependency
+idle = false
+lastActivity = undefined
 
 start = (threshold, interval) ->
   throw new Error("Idle monitor is already active. Stop it first.") if monitorId
 
-  threshold = 30000 unless threshold
+  threshold = 60000 unless threshold
   interval = 1000 unless interval
-  # Cancel existing if necessary
-  stop()
-  reset()
 
   # TODO Attach monitor events to window blur and body
 
   # Set new monitoring interval
-  monitorId = Meteor.setInterval(@monitor, interval)
+  monitorId = Meteor.setInterval(monitor, interval)
+  return
 
 stop = ->
-  return unless monitorId
-  Metero.clearInterval(monitorId)
+  throw new Error("Idle monitor is not running.") unless monitorId
+
+  # Detach window events
+
+  Meteor.clearInterval(monitorId)
   monitorId = null
+  return
 
-reset = ->
-  return unless monitorId
+monitor = (isAction) ->
+  currentTime = Deps.nonreactive(-> TimeSync.serverTime() )
+  if isAction
+    lastActivity = currentTime
 
-  currentTime = Date.now()
-  inactiveTime = currentTime - @lastInactive
+  inactiveTime = currentTime - lastActivity
 
-  @callback?(inactiveTime) if inactiveTime > @inactivityThreshold
+  if inactiveTime > idleThreshold and idle is false
+    idle = true
+    inactiveDep.changed()
+  else if inactiveTime <= idleThreshold and idle is true
+    idle = false
+    inactiveDep.changed()
 
-  @lastInactive = currentTime
+  return
 
-monitor = ->
-  currentTime = Date.now()
-  inactiveTime = currentTime - @lastInactive
+touch = ->
+  unless monitorId
+    Meteor._debug("Cannot touch as idle monitor is not running.")
+    return
 
-  return unless inactiveTime > @inactivityThreshold
+  monitor(true) # Check for an idle state change right now
 
-  Meteor.call "record-inactive", {
-    start: @lastInactive,
-    time: inactiveTime
-  }
+isIdle = ->
+  inactiveDep.depend()
+  return idle
 
-  @callback?(inactiveTime)
+Deps.autorun ->
+  if isIdle()
+    Meteor.call "user-status-idle", lastActivity
+  else
+    # Don't report the first time this function runs
+    return unless lastActivity
+    # If we were inactive, report that we are active again to the server
+    Meteor.call "user-status-active", lastActivity
 
 # TODO: export functions for starting and stopping idle monitor
 UserStatus = {}
