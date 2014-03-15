@@ -30,6 +30,9 @@ if Meteor.isClient
     else
       return "undefined"
 
+  Template.status.serverTime = -> new Date(TimeSync.serverTime()).toLocaleString()
+  Template.status.serverOffset = TimeSync.serverOffset
+
   Template.serverStatus.users = -> Meteor.users.find()
   Template.serverStatus.userClass = -> if @status?.idle then "warning" else "success"
 
