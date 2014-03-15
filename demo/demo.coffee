@@ -24,7 +24,7 @@ if Meteor.isClient
       UserStatus.startMonitor
         threshold: tmpl.find("input[name=threshold]").valueAsNumber
         interval: tmpl.find("input[name=interval]").valueAsNumber
-        idleOnBlur: tmpl.find("select[name=idleOnBlur]").value
+        idleOnBlur: tmpl.find("select[name=idleOnBlur]").value is "true"
 
     "click .stop-monitor": ->
       UserStatus.stopMonitor()
