@@ -1,1 +1,4 @@
-/* CSS declarations go here */
+tr.bold > td {
+    font-weight: bold;
+    text-decoration: underline;
+}

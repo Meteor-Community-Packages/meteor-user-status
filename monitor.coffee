@@ -120,14 +120,14 @@ Meteor.startup ->
   # First check initial state if window loaded while blurred
   # Some browsers don't fire focus on load: http://stackoverflow.com/a/10325169/586086
   focused = document.hasFocus()
-  monitor()
 
 Deps.autorun ->
+  # Don't report idle state unless we're logged in and monitoring
+  return unless Meteor.userId() and isMonitoring()
+
   if isIdle()
     Meteor.call "user-status-idle", lastActivityTime
   else
-    # Don't report the first time this function runs
-    return unless lastActivityTime
     # If we were inactive, report that we are active again to the server
     Meteor.call "user-status-active", lastActivityTime
 

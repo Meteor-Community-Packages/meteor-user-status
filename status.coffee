@@ -5,19 +5,63 @@
   We may want to make UserSessions a server collection to take advantage of indices.
   Will implement if someone has enough online users to warrant it.
 ###
-UserSessions = new Meteor.Collection("user_status_sessions", { connection: null })
+UserConnections = new Meteor.Collection("user_status_sessions", { connection: null })
 
 statusEvents = new (Npm.require('events').EventEmitter)()
 
-removeSession = (userId, connectionId) ->
-  UserSessions.remove(connectionId)
-  statusEvents.emit "connectionLogout",
-    userId: userId
-    connectionId: connectionId
+###
+  Multiplex login/logout events to status.online
+###
+statusEvents.on "connectionLogin", (advice) ->
+  Meteor.users.update advice.userId,
+    $set:
+      'status.online': true,
+      'status.lastLogin': advice.loginTime
+  return
 
-  if UserSessions.find(userId: userId).count() is 0
-    Meteor.users.update userId,
+statusEvents.on "connectionLogout", (advice) ->
+  conns = UserConnections.find(userId: advice.userId).fetch()
+  if conns.length is 0
+    # Go offline if we are the last connection for this user
+    # This includes removing all idle information
+    Meteor.users.update advice.userId,
       $set: {'status.online': false }
+      $unset:
+        'status.idle': null
+        'status.lastActivity': null
+  else if _.every(conns, (c) -> c.idle)
+    # If the last active connection quit, then we should go idle with the most recent activity
+    Meteor.users.update advice.userId,
+      $set:
+        'status.idle': true
+        'status.lastActivity': _.max(_.pluck conns, "lastActivity")
+  return
+
+###
+  Multiplex idle/active events to status.idle
+  TODO: Hopefully this is quick because it's all in memory, but we can use indices if it turns out to be slow
+
+  TODO: There is a race condition when switching between tabs, leaving the user inactive while idle goes from one tab to the other.
+  It can probably be smoothed out.
+###
+statusEvents.on "connectionIdle", (advice) ->
+  conns = UserConnections.find(userId: advice.userId).fetch()
+  return unless _.every(conns, (c) -> c.idle)
+  # Set user to idle if all the connections are idle
+  # This idle be the most recent one in the vast majority of cases
+
+  # XXX the race happens here where everyone was idle when we looked for them but now one of them isn't.
+  Meteor.users.update advice.userId,
+    $set:
+      'status.idle': true
+      'status.lastActivity': advice.lastActivity
+  return
+
+statusEvents.on "connectionActive", (advice) ->
+  Meteor.users.update advice.userId,
+    $unset:
+      'status.idle': null
+      'status.lastActivity': null
   return
 
 # Clear any online users on startup (they will re-add themselves)
@@ -25,10 +69,23 @@ removeSession = (userId, connectionId) ->
 # but it is unreasonable to set the entire users collection to false on startup.
 Meteor.startup ->
   Meteor.users.update {}
-  , $unset: { "status.online": null }
+  , $unset: {
+    "status.online": null
+    "status.idle": null
+    "status.lastActivity": null
+  }
   , {multi: true}
 
+removeSession = (userId, connectionId) ->
+  UserConnections.remove(connectionId)
+  statusEvents.emit "connectionLogout",
+    userId: userId
+    connectionId: connectionId
+  return
+
 # pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
+# TODO: replace this with Meteor.onConnection?
+
 Meteor.publish null, ->
   userId = @_session.userId
   return unless @_session.socket?
@@ -39,7 +96,7 @@ Meteor.publish null, ->
   # Untrack connection on logout
   unless userId?
     # TODO: this could be replaced with a findAndModify once it's supported on Collections
-    existing = UserSessions.findOne(connectionId)
+    existing = UserConnections.findOne(connectionId)
     return unless existing? # Probably new session
 
     removeSession(existing.userId, connectionId)
@@ -49,7 +106,7 @@ Meteor.publish null, ->
 
   # Add socket to open connections
   # Hopefully no more duplicate key bug when using upsert!
-  UserSessions.upsert connectionId,
+  UserConnections.upsert connectionId,
     $set: {
       userId: userId
       ipAddr: ipAddr
@@ -62,12 +119,6 @@ Meteor.publish null, ->
     ipAddr: ipAddr
     loginTime: timestamp
 
-  Meteor.users.update userId,
-    $set: {
-      'status.online': true,
-      'status.lastLogin': timestamp
-    }
-
   # Remove socket on close
   @_session.socket.on "close", Meteor.bindEnvironment ->
     removeSession(userId, connectionId)
@@ -76,14 +127,16 @@ Meteor.publish null, ->
 
   return
 
-# TODO the below methods only care about logged in users. We can extend this to all users.
+# TODO the below methods only care about logged in users.
+# We can extend this to all users. (See also client code)
+
 Meteor.methods
   "user-status-idle": (timestamp) ->
     invocation = DDP._CurrentInvocation.get()
     return unless invocation.userId
     connection = invocation.connection
 
-    UserSessions.update connection.id,
+    UserConnections.update connection.id,
       $set: {
         idle: true
         lastActivity: timestamp
@@ -99,7 +152,7 @@ Meteor.methods
     return unless invocation.userId
     connection = invocation.connection
 
-    UserSessions.update connection.id,
+    UserConnections.update connection.id,
       $set: { idle: false }
       $unset: { lastActivity: null }
 
@@ -109,5 +162,5 @@ Meteor.methods
       lastActivity: timestamp
 
 UserStatus =
-  sessions: UserSessions
+  connections: UserConnections
   events: statusEvents

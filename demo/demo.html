@@ -67,20 +67,29 @@
 
     <table class="table table-condensed table-striped table-hover">
         <tr>
-            <th>Username</th>
-            <th>Connection</th>
+            <th>Username/Connection</th>
             <th>IP</th>
             <th>Idle</th>
             <th>Last Activity</th>
         </tr>
-        {{#each connections}}
-        <tr>
-            <td>{{username}}</td>
-            <td>{{_id}}</td>
-            <td>{{ipAddr}}</td>
-            <td>{{idle}}</td>
-            <td>{{lastActivity}}</td>
-        </tr>
+        {{#each users}}
+            <tr class="bold {{userClass}}">
+                <td colspan="2">{{username}}<br>(last login {{lastLogin}})</td>
+                <td>{{status.idle}}</td>
+                <td>{{lastActivity}}</td>
+            </tr>
+            {{#each connections}}
+            {{> serverConnection}}
+            {{/each}}
         {{/each}}
     </table>
+</template>
+
+<template name="serverConnection">
+    <tr class="{{connectionClass}}">
+        <td>{{_id}}<br>(login {{loginTime}})</td>
+        <td>{{ipAddr}}</td>
+        <td>{{idle}}</td>
+        <td>{{lastActivity}}</td>
+    </tr>
 </template>

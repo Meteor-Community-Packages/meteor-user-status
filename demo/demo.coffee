@@ -1,5 +1,5 @@
 if Meteor.isClient
-  UserSessions = new Meteor.Collection("user_status_sessions")
+  @UserConnections = new Meteor.Collection("user_status_sessions")
 
   Handlebars.registerHelper "userStatus", UserStatus
 
@@ -36,11 +36,26 @@ if Meteor.isClient
     else
       return "undefined"
 
-  Template.serverStatus.connections = -> UserSessions.find()
+  Template.serverStatus.users = -> Meteor.users.find()
+  Template.serverStatus.userClass = -> if @status?.idle then "warning" else "success"
 
-  Template.serverStatus.username = -> Meteor.users.findOne(@userId)?.username
+  Template.serverStatus.lastLogin = ->
+    lastLogin = @status?.lastLogin
+    return unless lastLogin?
+    return new Date(lastLogin).toLocaleString()
 
   Template.serverStatus.lastActivity = ->
+    lastActivity = @status?.lastActivity
+    if lastActivity?
+      return relativeTime lastActivity
+    else
+      return "(active or not monitoring)"
+
+  Template.serverStatus.connections = -> UserConnections.find(userId: @_id)
+
+  Template.serverConnection.connectionClass = -> if @idle then "warning" else "success"
+  Template.serverConnection.loginTime = -> new Date(@loginTime).toLocaleString()
+  Template.serverConnection.lastActivity = ->
     lastActivity = @lastActivity
     if lastActivity?
       return relativeTime lastActivity
@@ -49,7 +64,7 @@ if Meteor.isClient
 
   # Start monitor as soon as we got a signal, captain!
   Deps.autorun ->
-    if TimeSync.isSynced()
+    try
       UserStatus.startMonitor
         threshold: 30000
         idleOnBlur: true
@@ -62,9 +77,9 @@ if Meteor.isServer
 
   Meteor.publish null, ->
     [
-      Meteor.users.find {},
+      Meteor.users.find { "status.online": true }, # online users only
         fields:
           status: 1,
           username: 1
-      UserStatus.sessions.find()
+      UserStatus.connections.find()
     ]

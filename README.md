@@ -26,6 +26,8 @@ This package maintains two types of status: a general user online flag in `Meteo
 
 - `online`: whether there is at least one connection online for this user
 - `lastLogin`: when this user most recently logged in.
+- `idle`: whether all connections for this user are idle. Requires idle tracking to be turned on for all connections, as below.
+- `lastActivity`: if the user was idle, the last time an action was observed.
 
 To make this available on the client, use a reactive cursor, such as by creating a publication on the server:
 
@@ -83,7 +85,7 @@ On the client, the `UserStatus` object provides for seamless automatic monitorin
 
 For an example of how the above functions are used, see the demo.
 
-The `UserStatus.sessions` (in-memory) collection contains information for all (logged-in) connections on the server, in the following fields:
+The `UserStatus.connections` (in-memory) collection contains information for all (logged-in) connections on the server, in the following fields:
 
 - `_id`: the connection id
 - `userId`: the user id
@@ -91,7 +93,7 @@ The `UserStatus.sessions` (in-memory) collection contains information for all (l
 - `loginTime`: when the user logged in with this connection.
 - `idle`: `true` if idle monitoring is enabled on this connection and the client has gone idle.
 
-The `UserStatus.events` object is an `EventEmitter` on which you can listen for sessions logging in and out. Logging out includes closing the browser; reopening the browser will trigger a new login event. The following events are supported:
+The `UserStatus.events` object is an `EventEmitter` on which you can listen for connections logging in and out. Logging out includes closing the browser; reopening the browser will trigger a new login event. The following events are supported:
 
 - `connectionLogin` with fields `userId`, `connectionId`, and `ipAddr`
 - `connectionLogout` with fields `userId` and `connectionId`
@@ -102,7 +104,7 @@ Check out https://github.com/mizzao/meteor-accounts-testing for a simple account
 
 ## Testing
 
-There are some `Tinytest` unit tests that are used to test the logic in this package, but general testing with many users and sessions is hard. Hence, we have set up a demo app (http://user-status.meteor.com) for testing that is also hosted as a proof of concept. If you think you've found a bug in the package, try to replicate it on the demo app and post an issue with steps to reproduce.
+There are some `Tinytest` unit tests that are used to test the logic in this package, but general testing with many users and connections is hard. Hence, we have set up a demo app (http://user-status.meteor.com) for testing that is also hosted as a proof of concept. If you think you've found a bug in the package, try to replicate it on the demo app and post an issue with steps to reproduce.
 
 ## Contributors
 

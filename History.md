@@ -1,3 +1,7 @@
+## v0.3.1
+
+* Added multiplexing of idle status to `Meteor.users` as requested by @timhaines.
+
 ## v0.3.0
 
 * Added opt-in automatic **idle monitoring** on the client, which is reported to the server. See the demo app.

@@ -4,7 +4,7 @@ Package.describe({
 
 Package.on_use( function(api) {
     api.use('accounts-base');
-    api.use('coffeescript');
+    api.use(['coffeescript', 'underscore']);
 
     api.use(['deps', 'jquery'], 'client');
 
