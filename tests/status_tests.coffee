@@ -5,7 +5,7 @@ if Meteor.isServer
 
   Meteor.methods
     "grabStatus": -> Meteor.users.find({}, fields: { status: 1 }).fetch()
-    "grabSessions": -> UserSessions.find().fetch()
+    "grabSessions": -> UserStatus.sessions.find().fetch()
 
 if Meteor.isClient
   Tinytest.addAsync "status - login", (test, next) ->

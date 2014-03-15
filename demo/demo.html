@@ -1,0 +1,86 @@
+<head>
+  <title>User-Status Demonstration and Testing</title>
+</head>
+
+<body>
+<a href="https://github.com/mizzao/meteor-user-status">
+    <img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub">
+</a>
+<div class="container">
+    <div class="row">
+        <div class="span4 well">
+            {{> login}}
+            {{> status userStatus}}
+        </div>
+        <div class="span7 well">
+            {{> serverStatus }}
+        </div>
+    </div>
+</div>
+</body>
+
+<template name="login">
+    {{#if loggedIn}}
+    <h3>You are logged in as:</h3>
+    {{loginButtons}}
+    {{else}}
+    <h3>Log in with any username:</h3>
+    <form class="form-inline login">
+        <label>Username: </label>
+        <input type="text" name="username">
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    {{/if}}
+</template>
+
+<template name="status">
+    <h3>Local status:</h3>
+
+    <dl class="dl-horizontal">
+        <dt>Idle:</dt><dd>{{isIdle}}</dd>
+        <dt>Monitor on:</dt><dd>{{isMonitoring}}</dd>
+        <dt>Last Activity:</dt><dd>{{lastActivity}}</dd>
+    </dl>
+
+    {{#if isMonitoring}}
+    <h4>Idle monitoring is on.</h4>
+    <button class="btn btn-danger stop-monitor">Stop Monitor</button>
+    {{else}}
+    <form class="start-monitor">
+        <legend>Start monitor with the following parameters:</legend>
+        <label>Idle Threshold:</label>
+        <input name="threshold" type="number" min="5000" step="1" value="30000" required>
+        <label>Monitor Interval:</label>
+        <input name="interval" type="number" min="1000" step="1" value="1000" required>
+        <label>Idle on window blur:</label>
+        <select name="idleOnBlur" required>
+            <option value="true" selected>true</option>
+            <option value="false">false</option>
+        </select>
+        <button type="submit" class="btn btn-primary pull-right">Start Monitor</button>
+    </form>
+    {{/if}}
+</template>
+
+<template name="serverStatus">
+    <h3>All user connections on server:</h3>
+
+    <table class="table table-condensed table-striped table-hover">
+        <tr>
+            <th>Username</th>
+            <th>Connection</th>
+            <th>IP</th>
+            <th>Idle</th>
+            <th>Last Activity</th>
+        </tr>
+        {{#each connections}}
+        <tr>
+            <td>{{username}}</td>
+            <td>{{_id}}</td>
+            <td>{{ipAddr}}</td>
+            <td>{{idle}}</td>
+            <td>{{lastActivity}}</td>
+        </tr>
+        {{/each}}
+    </table>
+</template>

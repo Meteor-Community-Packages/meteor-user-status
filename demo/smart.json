@@ -1,0 +1,9 @@
+{
+  "packages": {
+    "accounts-testing": {},
+    "user-status": {
+      "path": ".."
+    },
+    "moment": {}
+  }
+}
