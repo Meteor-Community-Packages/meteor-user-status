@@ -4,6 +4,7 @@
     "user-status": {
       "path": ".."
     },
-    "moment": {}
+    "moment": {},
+    "bootboxjs": {}
   }
 }

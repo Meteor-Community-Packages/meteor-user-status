@@ -10,12 +10,6 @@ if Meteor.isClient
     ago = (if days then days + "d" else "") + time
     return new Date(timeAgo).toLocaleString() + " -" + ago + " ago"
 
-  Template.login.events =
-    "submit form.login": (e, tmpl) ->
-      e.preventDefault()
-      username = tmpl.find("input[name=username]").value
-      Meteor.insecureUserLogin username, (err, res) -> console.log(err) if err
-
   Template.login.loggedIn = -> Meteor.userId()
 
   Template.status.events =
@@ -61,6 +55,32 @@ if Meteor.isClient
       return relativeTime lastActivity
     else
       return "(active or not monitoring)"
+
+  Template.requestUsername.events =
+    "submit form": (e, tmpl) ->
+      e.preventDefault()
+      input = tmpl.find("input[name=username]")
+      input.blur()
+      Meteor.insecureUserLogin input.value, (err, res) -> console.log(err) if err
+
+  # Ask for a username as long as we're not logged in
+  usernameDialog = null
+
+  Meteor.startup ->
+    Deps.autorun ->
+      userId = Meteor.userId()
+      # Don't recompute this when status fields change
+      username = Meteor.users.findOne(userId, fields: {username: 1})?.username
+
+      if username and usernameDialog
+        usernameDialog.modal("hide")
+        usernameDialog = null
+        return
+
+      if !username and usernameDialog is null
+        usernameDialog = bootbox.dialog Meteor.render ->
+          Template.requestUsername()
+        return
 
   # Start monitor as soon as we got a signal, captain!
   Deps.autorun ->

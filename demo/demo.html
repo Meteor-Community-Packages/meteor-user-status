@@ -9,6 +9,15 @@
 <div class="container">
     <div class="row">
         <div class="span4 well">
+            <h3>Instructions</h3>
+            <ul>
+                <li>Log in with any username.
+                <li>Log in from other computers with the same username or open multiple tabs.
+                These will appear as sessions/connections under the same user.
+                <li>Click or keypress events reset the idle timer. The default idle threshold is 30 minutes.
+                <li>Idle session information is transmitted to the server and multiplexed into the user document.
+                <li>Play with the idle timer to try different client-side settings.
+            </ul>
             {{> login}}
             {{> status userStatus}}
         </div>
@@ -23,15 +32,23 @@
     {{#if loggedIn}}
     <h3>You are logged in as:</h3>
     {{loginButtons}}
-    {{else}}
-    <h3>Log in with any username:</h3>
-    <form class="form-inline login">
-        <label>Username: </label>
-        <input type="text" name="username">
-        <button type="submit" class="btn btn-primary">Login</button>
-    </form>
     {{/if}}
 </template>
+
+<template name="requestUsername">
+    <div class="modal-header">
+        <h3>Please enter a username to log in.</h3>
+    </div>
+    <div class="modal-body">
+        <form class="form-inline">
+            {{! We use the pattern below because it matches \w in in autocomplete for user names}}
+            <input type="text" name="username" required
+                   pattern="^[a-zA-Z][a-zA-Z0-9_]{5,12}$"
+                   placeholder="Username..."
+                   title="6-13 numbers or characters.">
+            <button type="submit" class="btn btn-primary">Continue</button>
+        </form>
+    </div                                                                </template>
 
 <template name="status">
     <h3>Local status:</h3>

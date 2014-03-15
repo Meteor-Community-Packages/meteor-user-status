@@ -112,6 +112,5 @@ There are some `Tinytest` unit tests that are used to test the logic in this pac
 * Rafael Sales (https://github.com/rafaelsales)
 * Jonathan James (https://github.com/jonjamz)
 * Kirk Stork (https://github.com/kastork)
-* Markus Gattol (https://github.com/markusgattol)
 
 If you found this package useful, I gratefully accept donations at [Gittip](https://www.gittip.com/mizzao/).
