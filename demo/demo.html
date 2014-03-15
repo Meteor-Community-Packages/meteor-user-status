@@ -14,9 +14,10 @@
                 <li>Log in with any username.
                 <li>Log in from other computers with the same username or open multiple tabs.
                 These will appear as sessions/connections under the same user.
-                <li>Click or keypress events reset the idle timer. The default idle threshold is 30 minutes.
+                <li>Click or keypress events reset the idle timer. The default idle threshold is 30 seconds.
                 <li>Idle session information is transmitted to the server and multiplexed into the user document.
                 <li>Play with the idle timer to try different client-side settings.
+                <li>Click 'Resync Time' a few times to see the variance in TimeSync.
             </ul>
             {{> login}}
             {{> status userStatus}}
@@ -48,10 +49,13 @@
                    title="6-13 numbers or characters.">
             <button type="submit" class="btn btn-primary">Continue</button>
         </form>
-    </div                                                                </template>
+    </div>
+</template>
 
 <template name="status">
     <h3>Local status:</h3>
+
+    <button class="btn btn-success resync">Resync Time</button>
 
     <dl class="dl-horizontal">
         <dt>Server Time:</dt><dd>{{serverTime}}</dd>

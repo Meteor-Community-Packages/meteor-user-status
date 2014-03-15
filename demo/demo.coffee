@@ -20,8 +20,8 @@ if Meteor.isClient
         interval: tmpl.find("input[name=interval]").valueAsNumber
         idleOnBlur: tmpl.find("select[name=idleOnBlur]").value is "true"
 
-    "click .stop-monitor": ->
-      UserStatus.stopMonitor()
+    "click .stop-monitor": -> UserStatus.stopMonitor()
+    "click .resync": -> TimeSync.resync()
 
   Template.status.lastActivity = ->
     lastActivity = @lastActivity()

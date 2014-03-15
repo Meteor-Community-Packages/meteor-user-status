@@ -129,36 +129,33 @@ Meteor.publish null, ->
 
 # TODO the below methods only care about logged in users.
 # We can extend this to all users. (See also client code)
+# We can trust the timestamp here because it was sent from a TimeSync value.
 
 Meteor.methods
   "user-status-idle": (timestamp) ->
-    invocation = DDP._CurrentInvocation.get()
-    return unless invocation.userId
-    connection = invocation.connection
+    return unless @userId
 
-    UserConnections.update connection.id,
+    UserConnections.update @connection.id,
       $set: {
         idle: true
         lastActivity: timestamp
       }
 
     statusEvents.emit "connectionIdle",
-      userId: invocation.userId
-      connectionId: connection.id
+      userId: @userId
+      connectionId: @connection.id
       lastActivity: timestamp
 
   "user-status-active": (timestamp) ->
-    invocation = DDP._CurrentInvocation.get()
-    return unless invocation.userId
-    connection = invocation.connection
+    return unless @userId
 
-    UserConnections.update connection.id,
+    UserConnections.update @connection.id,
       $set: { idle: false }
       $unset: { lastActivity: null }
 
     statusEvents.emit "connectionActive",
-      userId: invocation.userId
-      connectionId: connection.id
+      userId: @userId
+      connectionId: @connection.id
       lastActivity: timestamp
 
 UserStatus =
