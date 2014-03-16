@@ -1,3 +1,7 @@
+## vNEXT
+
+* Fix an issue with properly recording the user's latest idle time across a reconnection.
+
 ## v0.3.3
 
 * Refactored server-side code so that it was more testable, and added multiplexing tests.

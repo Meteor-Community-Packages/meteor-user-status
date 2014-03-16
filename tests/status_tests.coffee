@@ -282,7 +282,7 @@ Tinytest.add "status - simulate tab switch", withCleanup (test) ->
   test.isFalse user.status.idle?
   test.isFalse user.status.lastActivity?
 
-
+# TODO: Test for idling one session across a disconnection; not most recent idle time
 
 
 

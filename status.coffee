@@ -48,13 +48,13 @@ statusEvents.on "connectionIdle", (advice) ->
   conns = UserConnections.find(userId: advice.userId).fetch()
   return unless _.every(conns, (c) -> c.idle)
   # Set user to idle if all the connections are idle
-  # This idle be the most recent one in the vast majority of cases
+  # This will not be the most recent idle across a disconnection, so we use max
 
   # TODO: the race happens here where everyone was idle when we looked for them but now one of them isn't.
   Meteor.users.update advice.userId,
     $set:
       'status.idle': true
-      'status.lastActivity': advice.lastActivity
+      'status.lastActivity': _.max(_.pluck conns, "lastActivity")
   return
 
 statusEvents.on "connectionActive", (advice) ->

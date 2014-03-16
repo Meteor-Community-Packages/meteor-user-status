@@ -124,6 +124,14 @@ Meteor.startup ->
   # Some browsers don't fire focus on load: http://stackoverflow.com/a/10325169/586086
   focused = document.hasFocus()
 
+###
+  TODO: in rare case, an activity can happen when the window is blurred,
+   and the last activity time won't be properly reported to the server.
+  Recall the disconnect/reconnect loop with fake click example.
+  However, maybe we don't need to worry about this because it's not actually a client event.
+  We could ignore actions that happen while a client is idle and still appears to be idle, above
+###
+
 # Report idle status whenever connection changes
 Deps.autorun ->
   # Don't report idle state unless we're logged and we're monitoring
