@@ -54,6 +54,7 @@ start = (settings) ->
 
 stop = ->
   throw new Error("Idle monitor is not running.") unless monitorId
+
   Meteor.clearInterval(monitorId)
   monitorId = null
   monitorDep.changed()
@@ -61,6 +62,8 @@ stop = ->
   if idle # Un-set any idleness
     idle = false
     idleDep.changed()
+    # need to run this because the Deps below won't re-run when monitor is off
+    Meteor.call "user-status-active", Deps.nonreactive -> TimeSync.serverTime()
 
   return
 
@@ -69,7 +72,7 @@ monitor = (setAction) ->
   return unless monitorId
 
   # We use setAction here to not have to call serverTime twice. Premature optimization?
-  currentTime = Deps.nonreactive(-> TimeSync.serverTime() )
+  currentTime = Deps.nonreactive -> TimeSync.serverTime()
   return unless currentTime? # Can't monitor if we haven't synced with server yet.
 
   if setAction
@@ -122,7 +125,7 @@ Meteor.startup ->
   focused = document.hasFocus()
 
 Deps.autorun ->
-  # Don't report idle state unless we're logged in and monitoring
+  # Don't report idle state unless we're logged and we're monitoring
   return unless Meteor.userId() and isMonitoring()
 
   if isIdle()
@@ -130,6 +133,7 @@ Deps.autorun ->
   else
     # If we were inactive, report that we are active again to the server
     Meteor.call "user-status-active", lastActivityTime
+  return
 
 # export functions for starting and stopping idle monitor
 UserStatus = {

@@ -1,3 +1,7 @@
+## v0.3.2
+
+* Fixed an issue where stopping the idle monitor could leave the client in an idle state.
+
 ## v0.3.1
 
 * Added multiplexing of idle status to `Meteor.users` as requested by @timhaines.
