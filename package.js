@@ -14,7 +14,9 @@ Package.on_use( function(api) {
     api.add_files('status.coffee', 'server');
 
     api.export('UserStatus'); // on both
-    api.export('MonitorInternals', 'client', {testOnly: true}); // on both
+
+    api.export('MonitorInternals', 'client', {testOnly: true});
+    api.export('StatusInternals', 'server', {testOnly: true});
 });
 
 Package.on_test( function(api) {
@@ -28,7 +30,10 @@ Package.on_test( function(api) {
     api.use('tinytest');
 
     api.add_files("tests/insecure_login.js");
+    api.add_files('tests/setup.coffee', 'server');
     // Just some unit tests here. Use the test app otherwise.
     api.add_files('tests/monitor_tests.coffee', 'client');
-    api.add_files('tests/status_tests.coffee');
+    api.add_files('tests/status_tests.coffee', 'server');
+
+    api.add_files('tests/server_client_tests.coffee');
 });

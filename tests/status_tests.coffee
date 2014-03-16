@@ -1,64 +1,290 @@
-if Meteor.isServer
-  # Publish status to client
-  Meteor.publish null, -> Meteor.users.find {},
-    fields: { status: 1 }
+lastLoginAdvice = null
+lastLogoutAdvice = null
+lastIdleAdvice = null
+lastActiveAdvice = null
 
-  Meteor.methods
-    "grabStatus": -> Meteor.users.find({}, fields: { status: 1 }).fetch()
-    "grabSessions": -> UserStatus.connections.find().fetch()
+# Record events for tests
+UserStatus.events.on "connectionLogin", (advice) -> lastLoginAdvice = advice
+UserStatus.events.on "connectionLogout", (advice) -> lastLogoutAdvice = advice
+UserStatus.events.on "connectionIdle", (advice) -> lastIdleAdvice = advice
+UserStatus.events.on "connectionActive", (advice) -> lastActiveAdvice = advice
 
-if Meteor.isClient
-  Tinytest.addAsync "status - login", (test, next) ->
-    InsecureLogin.ready ->
-      test.ok()
-      next()
+# Make sure repeated calls to this return different values
+delayedTS = ->
+  Meteor._wrapAsync((cb) -> Meteor.setTimeout (-> cb undefined, Date.now()), 1)()
 
-  # Check that initialization is empty
-  Tinytest.addAsync "status - online recorded on server", (test, next) ->
-    Meteor.call "grabStatus", (err, res) ->
-      test.isUndefined err
-      test.length res, 1
+# Delete the entire status field and sessions after each test
+withCleanup = (fn) ->
+  return ->
+    try
+      fn.apply(this, arguments)
+    catch error
+      throw error
+    finally
+      lastLoginAdvice = null
+      lastLogoutAdvice = null
+      lastIdleAdvice = null
+      lastActiveAdvice = null
 
-      user = res[0]
-      test.equal user._id, Meteor.userId()
-      test.equal user.status.online, true
-      test.isFalse(user.status.lastLogin is undefined)
-      next()
+      Meteor.users.update TEST_userId,
+        $unset: status: null
+      UserStatus.connections.remove { userId: TEST_userId }
 
-  Tinytest.addAsync "status - session recorded on server", (test, next) ->
-    Meteor.call "grabSessions", (err, res) ->
-      test.isUndefined err
-      test.length res, 1
+      Meteor.flush()
 
-      doc = res[0]
-      test.equal doc.userId, Meteor.userId()
-      test.isFalse(doc.ipAddr is undefined)
-      test.isFalse(doc.loginTime is undefined)
-      next()
+# Clean up before we add any tests just in case some crap left over from before
+withCleanup ->
 
-  Tinytest.addAsync "status - online recorded on client", (test, next) ->
-    test.equal Meteor.user().status.online, true
-    next()
+Tinytest.add "status - adding one session", withCleanup (test) ->
+  conn = Random.id()
+  ts = delayedTS()
+  ip = "127.0.0.1"
 
-  Tinytest.addAsync "status - logout", (test, next) ->
-    Meteor.logout (err) ->
-      test.isUndefined err
-      next()
+  StatusInternals.addSession TEST_userId, conn, ts, ip
 
-  Tinytest.addAsync "status - offline recorded on server", (test, next) ->
-    Meteor.call "grabStatus", (err, res) ->
-      test.isUndefined err
-      test.length res, 1
+  doc = UserStatus.connections.findOne conn
+  user = Meteor.users.findOne TEST_userId
 
-      user = res[0]
-      test.isFalse(user._id is undefined)
-      test.equal user.status.online, false
-      # logintime is still maintained
-      test.isFalse(user.status.lastLogin is undefined)
-      next()
+  test.isTrue doc?
+  test.equal doc._id, conn
+  test.equal doc.userId, TEST_userId
+  test.equal doc.loginTime, ts
+  test.equal doc.ipAddr, ip
 
-  Tinytest.addAsync "status - session deleted on server", (test, next) ->
-    Meteor.call "grabSessions", (err, res) ->
-      test.isUndefined err
-      test.length res, 0
-      next()
+  test.equal lastLoginAdvice.userId, TEST_userId
+  test.equal lastLoginAdvice.connectionId, conn
+  test.equal lastLoginAdvice.loginTime, ts
+  test.equal lastLoginAdvice.ipAddr, ip
+
+  test.equal user.status.online, true
+  test.equal user.status.lastLogin, ts
+
+Tinytest.add "status - adding and removing one session", withCleanup (test) ->
+  conn = Random.id()
+  ts = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  logoutTime = delayedTS()
+  StatusInternals.removeSession TEST_userId, conn, logoutTime
+
+  doc = UserStatus.connections.findOne conn
+  user = Meteor.users.findOne TEST_userId
+
+  test.isFalse doc?
+
+  test.equal lastLogoutAdvice.userId, TEST_userId
+  test.equal lastLogoutAdvice.connectionId, conn
+  test.equal lastLogoutAdvice.logoutTime, logoutTime
+
+  test.equal user.status.online, false
+  test.equal user.status.lastLogin, ts
+
+Tinytest.add "status - idling one session", withCleanup (test) ->
+  conn = Random.id()
+  ts = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  idleTime = delayedTS()
+  StatusInternals.idleSession TEST_userId, conn, idleTime
+
+  doc = UserStatus.connections.findOne conn
+  user = Meteor.users.findOne TEST_userId
+
+  test.isTrue doc?
+  test.equal doc._id, conn
+  test.equal doc.userId, TEST_userId
+  test.equal doc.loginTime, ts,
+  test.equal doc.ipAddr, ip
+  test.equal doc.idle, true
+  test.equal doc.lastActivity, idleTime
+
+  test.equal lastIdleAdvice.userId, TEST_userId
+  test.equal lastIdleAdvice.connectionId, conn
+  test.equal lastIdleAdvice.lastActivity, idleTime
+
+  test.equal user.status.online, true
+  test.equal user.status.lastLogin, ts
+  test.equal user.status.idle, true
+  test.equal user.status.lastActivity, idleTime
+
+Tinytest.add "status - idling and reactivating one session", withCleanup (test) ->
+  conn = Random.id()
+  ts = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  idleTime = delayedTS()
+  StatusInternals.idleSession TEST_userId, conn, idleTime
+  activeTime = delayedTS()
+  StatusInternals.activeSession TEST_userId, conn, activeTime
+
+  doc = UserStatus.connections.findOne conn
+  user = Meteor.users.findOne TEST_userId
+
+  test.isTrue doc?
+  test.equal doc._id, conn
+  test.equal doc.userId, TEST_userId
+  test.equal doc.loginTime, ts,
+  test.equal doc.ipAddr, ip
+  test.equal doc.idle, false
+  test.isFalse doc.lastActivity?
+
+  test.equal lastActiveAdvice.userId, TEST_userId
+  test.equal lastActiveAdvice.connectionId, conn
+  test.equal lastActiveAdvice.lastActivity, activeTime
+
+  test.equal user.status.online, true
+  test.equal user.status.lastLogin, ts
+  test.isFalse user.status.idle?,
+  test.isFalse user.status.lastActivity?
+
+Tinytest.add "status - two online sessions", withCleanup (test) ->
+  conn = Random.id()
+  conn2 = Random.id()
+  ts = delayedTS()
+  ts2 = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  StatusInternals.addSession TEST_userId, conn2, ts2, ip
+
+  user = Meteor.users.findOne TEST_userId
+
+  test.equal user.status.online, true
+  test.equal user.status.lastLogin, ts2
+
+Tinytest.add "status - two online sessions with one going offline", withCleanup (test) ->
+  conn = Random.id()
+  conn2 = Random.id()
+  ts = delayedTS()
+  ts2 = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  StatusInternals.addSession TEST_userId, conn2, ts2, ip
+
+  StatusInternals.removeSession TEST_userId, conn, delayedTS(),
+
+  user = Meteor.users.findOne TEST_userId
+
+  test.equal user.status.online, true
+  test.equal user.status.lastLogin, ts2
+
+Tinytest.add "status - two online sessions to offline", withCleanup (test) ->
+  conn = Random.id()
+  conn2 = Random.id()
+  ts = delayedTS()
+  ts2 = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  StatusInternals.addSession TEST_userId, conn2, ts2, ip
+
+  StatusInternals.removeSession TEST_userId, conn, delayedTS()
+  StatusInternals.removeSession TEST_userId, conn2, delayedTS()
+
+  user = Meteor.users.findOne TEST_userId
+
+  test.equal user.status.online, false
+  test.equal user.status.lastLogin, ts2
+
+Tinytest.add "status - idling one of two online sessions", withCleanup (test) ->
+  conn = Random.id()
+  conn2 = Random.id()
+  ts = delayedTS()
+  ts2 = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  StatusInternals.addSession TEST_userId, conn2, ts2, ip
+
+  idle1 = delayedTS()
+  StatusInternals.idleSession TEST_userId, conn, idle1
+
+  user = Meteor.users.findOne TEST_userId
+
+  test.equal user.status.online, true
+  test.equal user.status.lastLogin, ts2
+  test.isFalse user.status.idle?
+
+Tinytest.add "status - idling two online sessions", withCleanup (test) ->
+  conn = Random.id()
+  conn2 = Random.id()
+  ts = delayedTS()
+  ts2 = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  StatusInternals.addSession TEST_userId, conn2, ts2, ip
+
+  idle1 = delayedTS()
+  idle2 = delayedTS()
+  StatusInternals.idleSession TEST_userId, conn, idle1
+  StatusInternals.idleSession TEST_userId, conn2, idle2
+
+  user = Meteor.users.findOne TEST_userId
+
+  test.equal user.status.online, true
+  test.equal user.status.lastLogin, ts2
+  test.equal user.status.idle, true
+  test.equal user.status.lastActivity, idle2
+
+Tinytest.add "status - idling two then reactivating one session", withCleanup (test) ->
+  conn = Random.id()
+  conn2 = Random.id()
+  ts = delayedTS()
+  ts2 = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  StatusInternals.addSession TEST_userId, conn2, ts2, ip
+
+  idle1 = delayedTS()
+  idle2 = delayedTS()
+  StatusInternals.idleSession TEST_userId, conn, idle1
+  StatusInternals.idleSession TEST_userId, conn2, idle2
+
+  StatusInternals.activeSession TEST_userId, conn, delayedTS()
+
+  user = Meteor.users.findOne TEST_userId
+
+  test.equal user.status.online, true
+  test.equal user.status.lastLogin, ts2
+  test.isFalse user.status.idle?
+  test.isFalse user.status.lastActivity?
+
+Tinytest.add "status - simulate tab switch", withCleanup (test) ->
+  conn = Random.id()
+  conn2 = Random.id()
+  ts = delayedTS()
+  ts2 = delayedTS()
+  ip = "127.0.0.1"
+
+  # open first tab then becomes idle
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  idle1 = delayedTS()
+  StatusInternals.idleSession TEST_userId, conn, idle1
+
+  # open second tab then becomes idle
+  StatusInternals.addSession TEST_userId, conn2, ts2, ip
+  idle2 = delayedTS()
+  StatusInternals.idleSession TEST_userId, conn2, idle2
+
+  # go back to first tab
+  StatusInternals.activeSession TEST_userId, conn, delayedTS()
+
+  user = Meteor.users.findOne TEST_userId
+
+  test.equal user.status.online, true
+  test.equal user.status.lastLogin, ts2
+  test.isFalse user.status.idle?
+  test.isFalse user.status.lastActivity?
+
+
+
+
+
+
+

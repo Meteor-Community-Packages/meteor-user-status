@@ -50,7 +50,7 @@ statusEvents.on "connectionIdle", (advice) ->
   # Set user to idle if all the connections are idle
   # This idle be the most recent one in the vast majority of cases
 
-  # XXX the race happens here where everyone was idle when we looked for them but now one of them isn't.
+  # TODO: the race happens here where everyone was idle when we looked for them but now one of them isn't.
   Meteor.users.update advice.userId,
     $set:
       'status.idle': true
@@ -76,36 +76,11 @@ Meteor.startup ->
   }
   , {multi: true}
 
-removeSession = (userId, connectionId) ->
-  UserConnections.remove(connectionId)
-  statusEvents.emit "connectionLogout",
-    userId: userId
-    connectionId: connectionId
-  return
+###
+  Local session modifification functions - also used in testing
+###
 
-# pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
-# TODO: replace this with Meteor.onConnection?
-
-Meteor.publish null, ->
-  userId = @_session.userId
-  return unless @_session.socket?
-  connection = @_session.connectionHandle
-  connectionId = @_session.id # same as connection.id
-  timestamp = Date.now()
-
-  # Untrack connection on logout
-  unless userId?
-    # TODO: this could be replaced with a findAndModify once it's supported on Collections
-    existing = UserConnections.findOne(connectionId)
-    return unless existing? # Probably new session
-
-    removeSession(existing.userId, connectionId)
-    return
-
-  ipAddr = connection.clientAddress
-
-  # Add socket to open connections
-  # Hopefully no more duplicate key bug when using upsert!
+addSession = (userId, connectionId, timestamp, ipAddr) ->
   UserConnections.upsert connectionId,
     $set: {
       userId: userId
@@ -118,46 +93,97 @@ Meteor.publish null, ->
     connectionId: connectionId
     ipAddr: ipAddr
     loginTime: timestamp
+  return
+
+removeSession = (userId, connectionId, timestamp) ->
+  UserConnections.remove(connectionId)
+
+  statusEvents.emit "connectionLogout",
+    userId: userId
+    connectionId: connectionId
+    logoutTime: timestamp
+  return
+
+idleSession = (userId, connectionId, timestamp) ->
+  UserConnections.update connectionId,
+    $set: {
+      idle: true
+      lastActivity: timestamp
+    }
+
+  statusEvents.emit "connectionIdle",
+    userId: userId
+    connectionId: connectionId
+    lastActivity: timestamp
+  return
+
+activeSession = (userId, connectionId, timestamp) ->
+  UserConnections.update connectionId,
+    $set: { idle: false }
+    $unset: { lastActivity: null }
+
+  statusEvents.emit "connectionActive",
+    userId: userId
+    connectionId: connectionId
+    lastActivity: timestamp
+  return
+
+# pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
+# TODO: replace this with Meteor.onConnection?
+
+Meteor.publish null, ->
+  timestamp = Date.now() # compute this as early as possible
+  userId = @_session.userId
+  return unless @_session.socket? # Or there is nothing to close!
+
+  connection = @_session.connectionHandle
+  connectionId = @_session.id # same as connection.id
+
+  # Untrack connection on logout
+  unless userId?
+    # TODO: this could be replaced with a findAndModify once it's supported on Collections
+    existing = UserConnections.findOne(connectionId)
+    return unless existing? # Probably new session
+
+    removeSession(existing.userId, connectionId, timestamp)
+    return
+
+  # Add socket to open connections
+  addSession(userId, connectionId, timestamp, connection.clientAddress)
 
   # Remove socket on close
   @_session.socket.on "close", Meteor.bindEnvironment ->
-    removeSession(userId, connectionId)
+    removeSession(userId, connectionId, Date.now())
   , (e) ->
     Meteor._debug "Exception from connection close callback:", e
-
   return
 
 # TODO the below methods only care about logged in users.
 # We can extend this to all users. (See also client code)
 # We can trust the timestamp here because it was sent from a TimeSync value.
-
 Meteor.methods
   "user-status-idle": (timestamp) ->
     return unless @userId
-
-    UserConnections.update @connection.id,
-      $set: {
-        idle: true
-        lastActivity: timestamp
-      }
-
-    statusEvents.emit "connectionIdle",
-      userId: @userId
-      connectionId: @connection.id
-      lastActivity: timestamp
+    idleSession(@userId, @connection.id, timestamp)
+    return
 
   "user-status-active": (timestamp) ->
     return unless @userId
+    # We only use timestamp because it's when we saw activity *on the client*
+    # as opposed to just being notified it.
+    # It is probably more accurate even if a few hundred ms off
+    # due to how long the message took to get here.
+    activeSession(@userId, @connection.id, timestamp)
+    return
 
-    UserConnections.update @connection.id,
-      $set: { idle: false }
-      $unset: { lastActivity: null }
-
-    statusEvents.emit "connectionActive",
-      userId: @userId
-      connectionId: @connection.id
-      lastActivity: timestamp
-
+# Exported variable
 UserStatus =
   connections: UserConnections
   events: statusEvents
+
+# Internal functions, exported for testing
+StatusInternals =
+  addSession: addSession
+  removeSession: removeSession
+  idleSession: idleSession
+  activeSession: activeSession

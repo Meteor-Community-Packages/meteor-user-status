@@ -1,3 +1,7 @@
+## vNEXT
+
+* Refactored server-side code so that it was more testable, and added multiplexing tests.
+
 ## v0.3.2
 
 * Fixed an issue where stopping the idle monitor could leave the client in an idle state.
