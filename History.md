@@ -1,6 +1,7 @@
-## vNEXT
+## v0.3.3
 
 * Refactored server-side code so that it was more testable, and added multiplexing tests.
+* Fixed an issue where idle state would not be maintained if a connection was interrupted.
 
 ## v0.3.2
 

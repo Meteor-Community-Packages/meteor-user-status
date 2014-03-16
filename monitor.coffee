@@ -124,15 +124,32 @@ Meteor.startup ->
   # Some browsers don't fire focus on load: http://stackoverflow.com/a/10325169/586086
   focused = document.hasFocus()
 
+# Report idle status whenever connection changes
 Deps.autorun ->
   # Don't report idle state unless we're logged and we're monitoring
   return unless Meteor.userId() and isMonitoring()
 
+  # XXX These will buffer across a disconnection - do we want that?
+  # The idle report will result in a duplicate message (with below)
+  # The active report will result in a null op.
   if isIdle()
     Meteor.call "user-status-idle", lastActivityTime
   else
     # If we were inactive, report that we are active again to the server
     Meteor.call "user-status-active", lastActivityTime
+  return
+
+# If we reconnect and we were idle, make sure we send that upstream
+wasConnected = Meteor.status().connected
+Deps.autorun ->
+  connected = Meteor.status().connected
+  # We only need to do something if we reconnect and we are idle
+  # Don't get idle status reactively, as this function only
+  # takes care of reconnect status and doesn't care if it changes.
+  if connected and !wasConnected and idle
+    Meteor.call "user-status-idle", lastActivityTime
+
+  wasConnected = connected
   return
 
 # export functions for starting and stopping idle monitor
