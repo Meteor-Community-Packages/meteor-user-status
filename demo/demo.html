@@ -57,6 +57,7 @@
 
     <button class="btn btn-success resync">Resync Time</button>
 
+    {{#isolate}} {{! so it's not hard to click buttons}}
     <dl class="dl-horizontal">
         <dt>Server Time:</dt><dd>{{serverTime}}</dd>
         <dt>Local Offset:</dt><dd>{{serverOffset}} ms</dd>
@@ -64,6 +65,7 @@
         <dt>Monitor on:</dt><dd>{{isMonitoring}}</dd>
         <dt>Last Activity:</dt><dd>{{lastActivity}}</dd>
     </dl>
+    {{/isolate}}
 
     {{#if isMonitoring}}
     <h4>Idle monitoring is on.</h4>

@@ -11,7 +11,7 @@
 * Added opt-in automatic **idle monitoring** on the client, which is reported to the server. See the demo app.
 * Export a single `UserStatus` variable on the server and the client, that contains all operations. **Breaks compatibility with previous usage:** the previous `UserStatus` variable is now `UserStatus.events`.
 * The `sessionLogin` and `sessionLogout` events have been renamed `connectionLogin` and `connectionLogout` along with the new `connectionIdle` and `connectionActive` events. **Breaks compatibility with previous usage.**
-* `sessionId` has also been renamed `connectionId` as per the Meteor change.
+* In callbacks, `sessionId` has also been renamed `connectionId` as per the Meteor change.
 
 ## v0.2.0
 
