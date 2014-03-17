@@ -42,4 +42,11 @@ Tinytest.add "monitor - idle above threshold", (test) ->
   # Shouldn't change if we go out of focus
   test.equal MonitorInternals.computeState(activity, newTime, false), true
 
-# TODO: Add client-side tests for DOM as well
+###
+  TODO: Add client-side tests as well
+
+  - Disconnect / reconnect while idle
+  - Start monitor with window blurred (and idleOnBlur)
+  - Skip actions when window blurred (and idleOnBlur)
+  - Unset idleness when stopping monitor
+###
