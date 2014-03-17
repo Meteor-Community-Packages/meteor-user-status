@@ -30,11 +30,18 @@ statusEvents.on "connectionLogout", (advice) ->
         'status.idle': null
         'status.lastActivity': null
   else if _.every(conns, (c) -> c.idle)
-    # If the last active connection quit, then we should go idle with the most recent activity
+    ###
+      If the last active connection quit, then we should go idle with the most recent activity
+
+      If the most recently active idle connection quit, we shouldn't tick the value backwards.
+      TODO this may result in a no-op so maybe we can skip the update.
+    ###
+    lastActivity = _.max(_.pluck conns, "lastActivity")
+    lastActivity = Math.max(lastActivity, advice.lastActivity) if advice.lastActivity?
     Meteor.users.update advice.userId,
       $set:
         'status.idle': true
-        'status.lastActivity': _.max(_.pluck conns, "lastActivity")
+        'status.lastActivity': lastActivity
   return
 
 ###
@@ -96,11 +103,16 @@ addSession = (userId, connectionId, timestamp, ipAddr) ->
   return
 
 removeSession = (userId, connectionId, timestamp) ->
+  conn = UserConnections.findOne(connectionId)
   UserConnections.remove(connectionId)
+
+  # Don't emit this again if the connection was already closed
+  return unless conn?
 
   statusEvents.emit "connectionLogout",
     userId: userId
     connectionId: connectionId
+    lastActivity: conn?.lastActivity # If this connection was idle, pass the last activity we saw
     logoutTime: timestamp
   return
 
@@ -129,7 +141,7 @@ activeSession = (userId, connectionId, timestamp) ->
   return
 
 # pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
-# TODO: replace this with Meteor.onConnection?
+# TODO: replace this with Meteor.onConnection and login hooks.
 
 Meteor.publish null, ->
   timestamp = Date.now() # compute this as early as possible

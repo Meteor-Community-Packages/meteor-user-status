@@ -49,7 +49,8 @@ start = (settings) ->
   monitorId = Meteor.setInterval(monitor, interval)
   monitorDep.changed()
 
-  monitor(true) # Reset last activity; can't count inactivity from some arbitrary time
+  # Reset last activity; can't count inactivity from some arbitrary time
+  monitor(true)
   return
 
 stop = ->
@@ -75,7 +76,8 @@ monitor = (setAction) ->
   currentTime = Deps.nonreactive -> TimeSync.serverTime()
   return unless currentTime? # Can't monitor if we haven't synced with server yet.
 
-  if setAction
+  # Update action as long as we're not blurred and idling on blur
+  if setAction and (focused or !MonitorInternals.idleOnBlur)
     lastActivityTime = currentTime
     activityDep.changed()
 
@@ -154,6 +156,10 @@ Deps.autorun ->
   # We only need to do something if we reconnect and we are idle
   # Don't get idle status reactively, as this function only
   # takes care of reconnect status and doesn't care if it changes.
+
+  # Note that userId does not change during a resume login, as designed by Meteor.
+  # However, a not logged in user will just have this method ignored by the server.
+  # TODO when we support anonymous sessions, make sure this still works
   if connected and !wasConnected and idle
     Meteor.call "user-status-idle", lastActivityTime
 

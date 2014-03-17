@@ -41,3 +41,5 @@ Tinytest.add "monitor - idle above threshold", (test) ->
   test.equal MonitorInternals.computeState(activity, newTime, true), true
   # Shouldn't change if we go out of focus
   test.equal MonitorInternals.computeState(activity, newTime, false), true
+
+# TODO: Add client-side tests for DOM as well

@@ -76,6 +76,31 @@ Tinytest.add "status - adding and removing one session", withCleanup (test) ->
   test.equal lastLogoutAdvice.userId, TEST_userId
   test.equal lastLogoutAdvice.connectionId, conn
   test.equal lastLogoutAdvice.logoutTime, logoutTime
+  test.isFalse lastLogoutAdvice.lastActivity?
+
+  test.equal user.status.online, false
+  test.equal user.status.lastLogin, ts
+
+Tinytest.add "status - logout and then close one session", withCleanup (test) ->
+  conn = Random.id()
+  ts = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  logoutTime = delayedTS()
+  StatusInternals.removeSession TEST_userId, conn, logoutTime
+
+  lastLogoutAdvice = null
+  # After logging out, the user closes the browser, which triggers a close callback
+  # However, the event should not be emitted again
+  closeTime = delayedTS()
+  StatusInternals.removeSession TEST_userId, conn, closeTime
+
+  doc = UserStatus.connections.findOne conn
+  user = Meteor.users.findOne TEST_userId
+
+  test.isFalse doc?
+  test.isFalse lastLogoutAdvice?
 
   test.equal user.status.online, false
   test.equal user.status.lastLogin, ts
@@ -140,7 +165,66 @@ Tinytest.add "status - idling and reactivating one session", withCleanup (test) 
   test.isFalse user.status.idle?,
   test.isFalse user.status.lastActivity?
 
-Tinytest.add "status - two online sessions", withCleanup (test) ->
+Tinytest.add "status - idling and removing one session", withCleanup (test) ->
+  conn = Random.id()
+  ts = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  idleTime = delayedTS()
+  StatusInternals.idleSession TEST_userId, conn, idleTime
+  logoutTime = delayedTS()
+  StatusInternals.removeSession TEST_userId, conn, logoutTime
+
+  doc = UserStatus.connections.findOne conn
+  user = Meteor.users.findOne TEST_userId
+
+  test.isFalse doc?
+
+  test.equal lastLogoutAdvice.userId, TEST_userId
+  test.equal lastLogoutAdvice.connectionId, conn
+  test.equal lastLogoutAdvice.logoutTime, logoutTime
+  test.equal lastLogoutAdvice.lastActivity, idleTime
+
+  test.equal user.status.online, false
+  test.equal user.status.lastLogin, ts
+
+Tinytest.add "status - idling and reconnecting one session", withCleanup (test) ->
+  conn = Random.id()
+  ts = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  idleTime = delayedTS()
+  StatusInternals.idleSession TEST_userId, conn, idleTime
+
+  # Session reconnects but was idle
+
+  discTime = delayedTS()
+  StatusInternals.removeSession TEST_userId, conn, discTime
+
+  reconn = Random.id()
+  reconnTime = delayedTS()
+  StatusInternals.addSession TEST_userId, reconn, reconnTime, ip
+  StatusInternals.idleSession TEST_userId, reconn, idleTime
+
+  doc = UserStatus.connections.findOne reconn
+  user = Meteor.users.findOne TEST_userId
+
+  test.isTrue doc?
+  test.equal doc._id, reconn
+  test.equal doc.userId, TEST_userId
+  test.equal doc.loginTime, reconnTime,
+  test.equal doc.ipAddr, ip
+  test.equal doc.idle, true
+  test.equal doc.lastActivity, idleTime
+
+  test.equal user.status.online, true
+  test.equal user.status.lastLogin, reconnTime
+  test.equal user.status.idle, true
+  test.equal user.status.lastActivity, idleTime
+
+Tinytest.add "multiplex - two online sessions", withCleanup (test) ->
   conn = Random.id()
   conn2 = Random.id()
   ts = delayedTS()
@@ -155,7 +239,7 @@ Tinytest.add "status - two online sessions", withCleanup (test) ->
   test.equal user.status.online, true
   test.equal user.status.lastLogin, ts2
 
-Tinytest.add "status - two online sessions with one going offline", withCleanup (test) ->
+Tinytest.add "multiplex - two online sessions with one going offline", withCleanup (test) ->
   conn = Random.id()
   conn2 = Random.id()
   ts = delayedTS()
@@ -172,7 +256,7 @@ Tinytest.add "status - two online sessions with one going offline", withCleanup 
   test.equal user.status.online, true
   test.equal user.status.lastLogin, ts2
 
-Tinytest.add "status - two online sessions to offline", withCleanup (test) ->
+Tinytest.add "multiplex - two online sessions to offline", withCleanup (test) ->
   conn = Random.id()
   conn2 = Random.id()
   ts = delayedTS()
@@ -190,7 +274,7 @@ Tinytest.add "status - two online sessions to offline", withCleanup (test) ->
   test.equal user.status.online, false
   test.equal user.status.lastLogin, ts2
 
-Tinytest.add "status - idling one of two online sessions", withCleanup (test) ->
+Tinytest.add "multiplex - idling one of two online sessions", withCleanup (test) ->
   conn = Random.id()
   conn2 = Random.id()
   ts = delayedTS()
@@ -209,7 +293,7 @@ Tinytest.add "status - idling one of two online sessions", withCleanup (test) ->
   test.equal user.status.lastLogin, ts2
   test.isFalse user.status.idle?
 
-Tinytest.add "status - idling two online sessions", withCleanup (test) ->
+Tinytest.add "multiplex - idling two online sessions", withCleanup (test) ->
   conn = Random.id()
   conn2 = Random.id()
   ts = delayedTS()
@@ -231,7 +315,7 @@ Tinytest.add "status - idling two online sessions", withCleanup (test) ->
   test.equal user.status.idle, true
   test.equal user.status.lastActivity, idle2
 
-Tinytest.add "status - idling two then reactivating one session", withCleanup (test) ->
+Tinytest.add "multiplex - idling two then reactivating one session", withCleanup (test) ->
   conn = Random.id()
   conn2 = Random.id()
   ts = delayedTS()
@@ -255,7 +339,7 @@ Tinytest.add "status - idling two then reactivating one session", withCleanup (t
   test.isFalse user.status.idle?
   test.isFalse user.status.lastActivity?
 
-Tinytest.add "status - simulate tab switch", withCleanup (test) ->
+Tinytest.add "multiplex - simulate tab switch", withCleanup (test) ->
   conn = Random.id()
   conn2 = Random.id()
   ts = delayedTS()
@@ -282,7 +366,43 @@ Tinytest.add "status - simulate tab switch", withCleanup (test) ->
   test.isFalse user.status.idle?
   test.isFalse user.status.lastActivity?
 
-# TODO: Test for idling one session across a disconnection; not most recent idle time
+# Test for idling one session across a disconnection; not most recent idle time
+Tinytest.add "multiplex - disconnection and reconnection while idle", withCleanup (test) ->
+  conn = Random.id()
+  conn2 = Random.id()
+  ts = delayedTS()
+  ts2 = delayedTS()
+  ip = "127.0.0.1"
+
+  StatusInternals.addSession TEST_userId, conn, ts, ip
+  StatusInternals.addSession TEST_userId, conn2, ts2, ip
+
+  idle1 = delayedTS()
+  StatusInternals.idleSession TEST_userId, conn, idle1
+  idle2 = delayedTS()
+  StatusInternals.idleSession TEST_userId, conn2, idle2
+
+  # Second session, which connected later, reconnects but remains idle
+  StatusInternals.removeSession TEST_userId, conn2, delayedTS()
+
+  user = Meteor.users.findOne TEST_userId
+
+  test.equal user.status.online, true
+  test.equal user.status.lastLogin, ts2
+  test.equal user.status.idle, true
+  test.equal user.status.lastActivity, idle2
+
+  reconn2 = Random.id()
+  ts3 = delayedTS()
+  StatusInternals.addSession TEST_userId, reconn2, ts3
+  StatusInternals.idleSession TEST_userId, reconn2, idle2
+
+  user = Meteor.users.findOne TEST_userId
+
+  test.equal user.status.online, true
+  test.equal user.status.lastLogin, ts3
+  test.equal user.status.idle, true
+  test.equal user.status.lastActivity, idle2
 
 
 

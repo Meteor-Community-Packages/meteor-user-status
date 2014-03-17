@@ -1,6 +1,7 @@
-## vNEXT
+## v0.3.4
 
 * Fix an issue with properly recording the user's latest idle time across a reconnection.
+* Ignore actions generated while the window is blurred with `idleOnBlur` enabled.
 
 ## v0.3.3
 
