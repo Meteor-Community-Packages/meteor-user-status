@@ -1,4 +1,5 @@
-# meteor-user-status
+user-status [![Build Status](https://travis-ci.org/mizzao/meteor-user-status.png?branch=master)](https://travis-ci.org/mizzao/meteor-user-status)
+===========
 
 Keeps track of user connection state and makes this available in `Meteor.users` as well as some other objects.
 
