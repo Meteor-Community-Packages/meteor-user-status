@@ -1,6 +1,5 @@
 {
   "packages": {
-    "accounts-testing": {},
     "moment": {},
     "bootboxjs": {},
     "timesync": {
@@ -8,6 +7,9 @@
     },
     "user-status": {
       "path": ".."
+    },
+    "accounts-testing": {
+      "path": "../../../meteor-accounts-testing"
     }
   }
 }

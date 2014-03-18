@@ -1,5 +1,5 @@
 *~
 
-# No dependencies so no need to check in smart.lock
+# No checking in smart.lock for a smart package
 smart.lock
 .build*
