@@ -82,8 +82,8 @@ if Meteor.isClient
         return
 
       if !username and usernameDialog is null
-        usernameDialog = bootbox.dialog Meteor.render ->
-          Template.requestUsername()
+        usernameDialog = bootbox.dialog()
+        UI.insert UI.render(Template.requestUsername), usernameDialog[0]
         return
 
   # Start monitor as soon as we got a signal, captain!

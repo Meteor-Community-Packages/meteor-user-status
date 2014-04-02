@@ -11,13 +11,13 @@
         <div class="span4 well">
             <h3>Instructions</h3>
             <ul>
-                <li>Log in with any username.
-                <li>Log in from other computers with the same username or open multiple tabs.
+                <li>Log in with any username.</li>
+                <li>Log in from other computers with the same username or open multiple tabs.</li>
                 These will appear as sessions/connections under the same user.
-                <li>Click or keypress events reset the idle timer. The default idle threshold is 30 seconds.
-                <li>Idle session information is transmitted to the server and multiplexed into the user document.
-                <li>Play with the idle timer to try different client-side settings.
-                <li>Click 'Resync Time' a few times to see the variance in TimeSync.
+                <li>Click or keypress events reset the idle timer. The default idle threshold is 30 seconds.</li>
+                <li>Idle session information is transmitted to the server and multiplexed into the user document.</li>
+                <li>Play with the idle timer to try different client-side settings.</li>
+                <li>Click 'Resync Time' a few times to see the variance in TimeSync.</li>
             </ul>
             {{> login}}
             {{> status userStatus}}
@@ -32,7 +32,7 @@
 <template name="login">
     {{#if loggedIn}}
     <h3>You are logged in as:</h3>
-    {{loginButtons}}
+    {{> loginButtons}}
     {{/if}}
 </template>
 
@@ -57,7 +57,6 @@
 
     <button class="btn btn-success resync">Resync Time</button>
 
-    {{#isolate}} {{! so it's not hard to click buttons}}
     <dl class="dl-horizontal">
         <dt>Server Time:</dt><dd>{{serverTime}}</dd>
         <dt>Local Offset:</dt><dd>{{serverOffset}} ms</dd>
@@ -66,7 +65,6 @@
         <dt>Monitor on:</dt><dd>{{isMonitoring}}</dd>
         <dt>Last Activity:</dt><dd>{{lastActivity}}</dd>
     </dl>
-    {{/isolate}}
 
     {{#if isMonitoring}}
     <h4>Idle monitoring is on.</h4>
