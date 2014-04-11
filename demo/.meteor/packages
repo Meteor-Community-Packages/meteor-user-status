@@ -6,7 +6,6 @@
 standard-app-packages
 insecure
 coffeescript
-bootstrap
 accounts-testing
 user-status
 timesync

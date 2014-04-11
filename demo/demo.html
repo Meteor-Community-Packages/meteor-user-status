@@ -8,7 +8,7 @@
 </a>
 <div class="container">
     <div class="row">
-        <div class="span4 well">
+        <div class="col-md-4 well">
             <h3>Instructions</h3>
             <ul>
                 <li>Log in with any username.</li>
@@ -22,7 +22,7 @@
             {{> login}}
             {{> status userStatus}}
         </div>
-        <div class="span7">
+        <div class="col-md-8">
             {{> serverStatus }}
         </div>
     </div>
@@ -37,18 +37,22 @@
 </template>
 
 <template name="requestUsername">
+    <div class="modal-dialog">
+    <div class="modal-content">
     <div class="modal-header">
         <h3>Please enter a username to log in.</h3>
     </div>
     <div class="modal-body">
         <form class="form-inline">
             {{! We use the pattern below because it matches \w in in autocomplete for user names}}
-            <input type="text" name="username" required
+            <input class="form-control" type="text" name="username" required
                    pattern="^[a-zA-Z][a-zA-Z0-9_]{5,12}$"
                    placeholder="Username..."
                    title="6-13 numbers or characters.">
             <button type="submit" class="btn btn-primary">Continue</button>
         </form>
+    </div>
+    </div>
     </div>
 </template>
 
@@ -73,11 +77,11 @@
     <form class="start-monitor">
         <legend>Start monitor with the following parameters:</legend>
         <label>Idle Threshold:</label>
-        <input name="threshold" type="number" min="5000" step="1" value="30000" required>
+        <input class="form-control" name="threshold" type="number" min="5000" step="1" value="30000" required>
         <label>Monitor Interval:</label>
-        <input name="interval" type="number" min="1000" step="1" value="1000" required>
+        <input class="form-control" name="interval" type="number" min="1000" step="1" value="1000" required>
         <label>Idle on window blur:</label>
-        <select name="idleOnBlur" required>
+        <select class="form-control" name="idleOnBlur" required>
             <option value="true" selected>true</option>
             <option value="false">false</option>
         </select>
