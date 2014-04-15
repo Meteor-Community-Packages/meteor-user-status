@@ -5,10 +5,10 @@ if Meteor.isClient
 
   relativeTime = (timeAgo) ->
     diff = moment.utc(TimeSync.serverTime() - timeAgo)
-    time = diff.format(" H:mm:ss")
+    time = diff.format("H:mm:ss")
     days = +diff.format("DDD") - 1
-    ago = (if days then days + "d" else "") + time
-    return new Date(timeAgo).toLocaleString() + " -" + ago + " ago"
+    ago = (if days then days + "d " else "") + time
+    return new Date(timeAgo).toLocaleString() + " - " + ago + " ago"
 
   Template.login.loggedIn = -> Meteor.userId()
 
