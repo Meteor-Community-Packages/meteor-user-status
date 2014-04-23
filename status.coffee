@@ -144,9 +144,13 @@ activeSession = (userId, connectionId, timestamp) ->
 # TODO: replace this with Meteor.onConnection and login hooks.
 
 Meteor.publish null, ->
+  # fast render cannot expose _session
+  # this check will fix the issues raised within fast-render
+  return null unless @_session
+
   timestamp = Date.now() # compute this as early as possible
   userId = @_session.userId
-  return unless @_session.socket? # Or there is nothing to close!
+  return null unless @_session.socket? # Or there is nothing to close!
 
   connection = @_session.connectionHandle
   connectionId = @_session.id # same as connection.id
@@ -155,10 +159,10 @@ Meteor.publish null, ->
   unless userId?
     # TODO: this could be replaced with a findAndModify once it's supported on Collections
     existing = UserConnections.findOne(connectionId)
-    return unless existing? # Probably new session
+    return null unless existing? # Probably new session
 
     removeSession(existing.userId, connectionId, timestamp)
-    return
+    return null
 
   # Add socket to open connections
   addSession(userId, connectionId, timestamp, connection.clientAddress)
@@ -168,7 +172,7 @@ Meteor.publish null, ->
     removeSession(userId, connectionId, Date.now())
   , (e) ->
     Meteor._debug "Exception from connection close callback:", e
-  return
+  return null
 
 # TODO the below methods only care about logged in users.
 # We can extend this to all users. (See also client code)
