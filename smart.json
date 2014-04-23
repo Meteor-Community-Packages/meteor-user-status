@@ -3,7 +3,7 @@
   "description": "User connection and idle state tracking for Meteor",
   "homepage": "https://github.com/mizzao/meteor-user-status",
   "author": "Andrew Mao  (http://www.andrewmao.net)",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "git": "https://github.com/mizzao/meteor-user-status.git",
   "packages": {
       "timesync": {}

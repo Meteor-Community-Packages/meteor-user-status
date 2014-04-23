@@ -1,3 +1,7 @@
+## v0.3.5
+
+* Add some shim code for better compatibility with fast-render. (#24)
+
 ## v0.3.4
 
 * Fix an issue with properly recording the user's latest idle time across a reconnection.

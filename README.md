@@ -5,6 +5,8 @@ Keeps track of user connection state and makes this available in `Meteor.users` 
 
 Check out a demo app at http://user-status.meteor.com, or its [source](https://github.com/mizzao/meteor-user-status/tree/master/demo).
 
+Help keep your favorite Meteor packages alive! If you depend on this package in your app and find it useful, consider a donation at [Gittip](https://www.gittip.com/mizzao/) for me (or other Meteor package maintainers).
+
 ## What's this do?
 
 Tracks users that are online and allows you to use them in useful ways, such as rendering the users online box below showing yourself in orange and other online users in green. Also keeps track of the last time a user logged in, and the time login occurred in the current user session:
@@ -106,12 +108,3 @@ Check out https://github.com/mizzao/meteor-accounts-testing for a simple account
 ## Testing
 
 There are some `Tinytest` unit tests that are used to test the logic in this package, but general testing with many users and connections is hard. Hence, we have set up a demo app (http://user-status.meteor.com) for testing that is also hosted as a proof of concept. If you think you've found a bug in the package, try to replicate it on the demo app and post an issue with steps to reproduce.
-
-## Contributors
-
-* Andrew Mao (https://github.com/mizzao/)
-* Rafael Sales (https://github.com/rafaelsales)
-* Jonathan James (https://github.com/jonjamz)
-* Kirk Stork (https://github.com/kastork)
-
-If you found this package useful, I gratefully accept donations at [Gittip](https://www.gittip.com/mizzao/).

@@ -144,8 +144,8 @@ activeSession = (userId, connectionId, timestamp) ->
 # TODO: replace this with Meteor.onConnection and login hooks.
 
 Meteor.publish null, ->
-  # fast render cannot expose _session
-  # this check will fix the issues raised within fast-render
+  # Return null explicitly if this._session is not available, i.e.:
+  # https://github.com/arunoda/meteor-fast-render/issues/41
   return null unless @_session
 
   timestamp = Date.now() # compute this as early as possible
