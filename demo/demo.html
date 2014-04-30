@@ -94,12 +94,15 @@
     <h3>All user connections on server:</h3>
 
     <table class="table table-condensed table-striped table-hover">
-        <tr>
-            <th>Username/Connection</th>
-            <th>IP</th>
-            <th>Idle</th>
-            <th>Last Activity</th>
-        </tr>
+        <thead>
+            <tr>
+                <th>Username/Connection</th>
+                <th>IP</th>
+                <th>Idle</th>
+                <th>Last Activity</th>
+            </tr>
+        </thead>
+        <tbody>
         {{#each users}}
             <tr class="bold {{userClass}}">
                 <td colspan="2">{{username}}<br>(last login {{lastLogin}})</td>
@@ -110,6 +113,7 @@
             {{> serverConnection}}
             {{/each}}
         {{/each}}
+        </tbody>
     </table>
 </template>
 

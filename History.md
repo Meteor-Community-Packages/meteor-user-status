@@ -1,3 +1,7 @@
+## v0.4.0
+
+* Store all dates as native `Date` objects in the database (#20). Most usage will be unaffected due to many libraries supporting the interchangeable use of `Date` objects or integer timestamps, but **some behavior may change when using operations with automatic type coercion, such as addition**.
+
 ## v0.3.5
 
 * Add some shim code for better compatibility with fast-render. (#24)

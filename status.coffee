@@ -31,17 +31,19 @@ statusEvents.on "connectionLogout", (advice) ->
         'status.lastActivity': null
   else if _.every(conns, (c) -> c.idle)
     ###
-      If the last active connection quit, then we should go idle with the most recent activity
+      All remaining connections are idle:
+      - If the last active connection quit, then we should go idle with the most recent activity
 
-      If the most recently active idle connection quit, we shouldn't tick the value backwards.
-      TODO this may result in a no-op so maybe we can skip the update.
+      - If an idle connection quit, nothing should happen; specifically, if the
+        most recently active idle connection quit, we shouldn't tick the value backwards.
+        This may result in a no-op so we can be smart and skip the update.
     ###
-    lastActivity = _.max(_.pluck conns, "lastActivity")
-    lastActivity = Math.max(lastActivity, advice.lastActivity) if advice.lastActivity?
+    return if advice.lastActivity? # The dropped connection was already idle
+
     Meteor.users.update advice.userId,
       $set:
         'status.idle': true
-        'status.lastActivity': lastActivity
+        'status.lastActivity': _.max(_.pluck conns, "lastActivity")
   return
 
 ###
@@ -87,49 +89,49 @@ Meteor.startup ->
   Local session modifification functions - also used in testing
 ###
 
-addSession = (userId, connectionId, timestamp, ipAddr) ->
+addSession = (userId, connectionId, date, ipAddr) ->
   UserConnections.upsert connectionId,
     $set: {
       userId: userId
       ipAddr: ipAddr
-      loginTime: timestamp
+      loginTime: date
     }
 
   statusEvents.emit "connectionLogin",
     userId: userId
     connectionId: connectionId
     ipAddr: ipAddr
-    loginTime: timestamp
+    loginTime: date
   return
 
-removeSession = (userId, connectionId, timestamp) ->
+removeSession = (userId, connectionId, date) ->
   conn = UserConnections.findOne(connectionId)
-  UserConnections.remove(connectionId)
-
   # Don't emit this again if the connection was already closed
   return unless conn?
+
+  UserConnections.remove(connectionId)
 
   statusEvents.emit "connectionLogout",
     userId: userId
     connectionId: connectionId
     lastActivity: conn?.lastActivity # If this connection was idle, pass the last activity we saw
-    logoutTime: timestamp
+    logoutTime: date
   return
 
-idleSession = (userId, connectionId, timestamp) ->
+idleSession = (userId, connectionId, date) ->
   UserConnections.update connectionId,
     $set: {
       idle: true
-      lastActivity: timestamp
+      lastActivity: date
     }
 
   statusEvents.emit "connectionIdle",
     userId: userId
     connectionId: connectionId
-    lastActivity: timestamp
+    lastActivity: date
   return
 
-activeSession = (userId, connectionId, timestamp) ->
+activeSession = (userId, connectionId, date) ->
   UserConnections.update connectionId,
     $set: { idle: false }
     $unset: { lastActivity: null }
@@ -137,7 +139,7 @@ activeSession = (userId, connectionId, timestamp) ->
   statusEvents.emit "connectionActive",
     userId: userId
     connectionId: connectionId
-    lastActivity: timestamp
+    lastActivity: date
   return
 
 # pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
@@ -148,7 +150,7 @@ Meteor.publish null, ->
   # https://github.com/arunoda/meteor-fast-render/issues/41
   return null unless @_session
 
-  timestamp = Date.now() # compute this as early as possible
+  date = new Date() # compute this as early as possible
   userId = @_session.userId
   return null unless @_session.socket? # Or there is nothing to close!
 
@@ -161,15 +163,15 @@ Meteor.publish null, ->
     existing = UserConnections.findOne(connectionId)
     return null unless existing? # Probably new session
 
-    removeSession(existing.userId, connectionId, timestamp)
+    removeSession(existing.userId, connectionId, date)
     return null
 
   # Add socket to open connections
-  addSession(userId, connectionId, timestamp, connection.clientAddress)
+  addSession(userId, connectionId, date, connection.clientAddress)
 
   # Remove socket on close
   @_session.socket.on "close", Meteor.bindEnvironment ->
-    removeSession(userId, connectionId, Date.now())
+    removeSession(userId, connectionId, new Date())
   , (e) ->
     Meteor._debug "Exception from connection close callback:", e
   return null
@@ -180,7 +182,7 @@ Meteor.publish null, ->
 Meteor.methods
   "user-status-idle": (timestamp) ->
     return unless @userId
-    idleSession(@userId, @connection.id, timestamp)
+    idleSession(@userId, @connection.id, new Date(timestamp))
     return
 
   "user-status-active": (timestamp) ->
@@ -189,7 +191,7 @@ Meteor.methods
     # as opposed to just being notified it.
     # It is probably more accurate even if a few hundred ms off
     # due to how long the message took to get here.
-    activeSession(@userId, @connection.id, timestamp)
+    activeSession(@userId, @connection.id, new Date(timestamp))
     return
 
 # Exported variable
