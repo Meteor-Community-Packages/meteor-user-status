@@ -125,7 +125,9 @@ Meteor.startup ->
 
   $(window).focus ->
     focused = true
-    monitor() # Does this count as an action?
+    # Focusing should count as an action, otherwise "active" event may be
+    # triggered at some point in the past!
+    monitor(true)
 
   # First check initial state if window loaded while blurred
   # Some browsers don't fire focus on load: http://stackoverflow.com/a/10325169/586086
