@@ -89,12 +89,12 @@ if Meteor.isClient
         return
 
   # Start monitor as soon as we got a signal, captain!
-  Deps.autorun ->
-    try
+  Deps.autorun (c) ->
+    try # May be an error if time is not synced
       UserStatus.startMonitor
         threshold: 30000
         idleOnBlur: true
-      @stop()
+      c.stop()
 
 if Meteor.isServer
   # Try setting this so it works on meteor.com
