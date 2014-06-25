@@ -1,3 +1,8 @@
+## vNEXT
+
+* Ensure that the last activity timestamp is reset when restarting the idle monitor after stopping it.
+* Add several unit tests for client-side idle monitoring logic.
+
 ## v0.4.1
 
 * Ensure that the latest activity timestamp updates when focusing into the app's window.

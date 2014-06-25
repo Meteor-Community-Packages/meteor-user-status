@@ -21,6 +21,7 @@ Package.on_use( function(api) {
 
 Package.on_test( function(api) {
     api.use('user-status');
+    api.use('timesync');
 
     // Why do we have to repeat ourselves here, and not able to use api.imply?
     api.use(['accounts-base', 'accounts-password']);
@@ -30,7 +31,7 @@ Package.on_test( function(api) {
     api.use('tinytest');
 
     api.add_files("tests/insecure_login.js");
-    api.add_files('tests/setup.coffee', 'server');
+    api.add_files('tests/setup.coffee');
     // Just some unit tests here. Use the test app otherwise.
     api.add_files('tests/monitor_tests.coffee', 'client');
     api.add_files('tests/status_tests.coffee', 'server');

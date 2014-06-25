@@ -7,18 +7,6 @@
   Everything is reactive, of course!
 ###
 
-# These settings are exported for test only
-MonitorInternals = {
-  idleThreshold: null
-  idleOnBlur: false
-}
-
-# This is the function that needs tests
-MonitorInternals.computeState = (lastActiveTime, currentTime, isWindowFocused) ->
-  inactiveTime = currentTime - lastActiveTime
-  return true if MonitorInternals.idleOnBlur and not isWindowFocused
-  return if (inactiveTime > MonitorInternals.idleThreshold) then true else false
-
 # State variables
 monitorId = null
 idle = false
@@ -29,6 +17,47 @@ idleDep = new Deps.Dependency
 activityDep = new Deps.Dependency
 
 focused = true
+
+# These settings are internal or exported for test only
+MonitorInternals = {
+  idleThreshold: null
+  idleOnBlur: false
+
+  computeState: (lastActiveTime, currentTime, isWindowFocused) ->
+    inactiveTime = currentTime - lastActiveTime
+    return true if MonitorInternals.idleOnBlur and not isWindowFocused
+    return if (inactiveTime > MonitorInternals.idleThreshold) then true else false
+
+  connectionChange: (isConnected, wasConnected) ->
+    # We only need to do something if we reconnect and we are idle
+    # Don't get idle status reactively, as this function only
+    # takes care of reconnect status and doesn't care if it changes.
+
+    # Note that userId does not change during a resume login, as designed by Meteor.
+    # However, a not logged in user will just have this method ignored by the server.
+
+    # TODO when we support anonymous sessions, make sure this still works
+    if isConnected and !wasConnected and idle
+      MonitorInternals.reportIdle(lastActivityTime)
+
+  onWindowBlur: ->
+    focused = false
+    monitor()
+
+  onWindowFocus: ->
+    focused = true
+    # Focusing should count as an action, otherwise "active" event may be
+    # triggered at some point in the past!
+    monitor(true)
+
+  reportIdle: (time) ->
+    Meteor.call "user-status-idle", time
+
+  reportActive: (time) ->
+    Meteor.call "user-status-active", time
+
+  userId: -> Meteor.userId()
+}
 
 start = (settings) ->
   throw new Error("Can't start idle monitor until synced to server") unless TimeSync.isSynced()
@@ -43,7 +72,7 @@ start = (settings) ->
   interval = Math.max(settings.interval || 1000, 1000)
 
   # Whether blurring the window should immediately cause the user to go idle
-  MonitorInternals.idleOnBlur = if ("idleOnBlur" of settings) then settings.idleOnBlur else false
+  MonitorInternals.idleOnBlur = if settings.idleOnBlur? then settings.idleOnBlur else false
 
   # Set new monitoring interval
   monitorId = Meteor.setInterval(monitor, interval)
@@ -62,13 +91,14 @@ stop = ->
 
   Meteor.clearInterval(monitorId)
   monitorId = null
+  lastActivityTime = undefined # If monitor started again, we shouldn't re-use this time
   monitorDep.changed()
 
   if idle # Un-set any idleness
     idle = false
     idleDep.changed()
     # need to run this because the Deps below won't re-run when monitor is off
-    Meteor.call "user-status-active", Deps.nonreactive -> TimeSync.serverTime()
+    MonitorInternals.reportActive( Deps.nonreactive -> TimeSync.serverTime() )
 
   return
 
@@ -119,51 +149,36 @@ Meteor.startup ->
   # catch window blur events when requested and where supported
   # We'll use jQuery here instead of window.blur so that other code can attach blur events:
   # http://stackoverflow.com/q/22415296/586086
-  $(window).blur ->
-    focused = false
-    monitor()
-
-  $(window).focus ->
-    focused = true
-    # Focusing should count as an action, otherwise "active" event may be
-    # triggered at some point in the past!
-    monitor(true)
+  $(window).blur MonitorInternals.onWindowBlur
+  $(window).focus MonitorInternals.onWindowFocus
 
   # First check initial state if window loaded while blurred
   # Some browsers don't fire focus on load: http://stackoverflow.com/a/10325169/586086
   focused = document.hasFocus()
 
-# Report idle status whenever connection changes
-Deps.autorun ->
-  # Don't report idle state unless we're logged and we're monitoring
-  return unless Meteor.userId() and isMonitoring()
+  # Report idle status whenever connection changes
+  Deps.autorun ->
+    # Don't report idle state unless we're logged and we're monitoring
+    return unless MonitorInternals.userId() and isMonitoring()
 
-  # XXX These will buffer across a disconnection - do we want that?
-  # The idle report will result in a duplicate message (with below)
-  # The active report will result in a null op.
-  if isIdle()
-    Meteor.call "user-status-idle", lastActivityTime
-  else
-    # If we were inactive, report that we are active again to the server
-    Meteor.call "user-status-active", lastActivityTime
-  return
+    # XXX These will buffer across a disconnection - do we want that?
+    # The idle report will result in a duplicate message (with below)
+    # The active report will result in a null op.
+    if isIdle()
+      MonitorInternals.reportIdle(lastActivityTime)
+    else
+      # If we were inactive, report that we are active again to the server
+      MonitorInternals.reportActive(lastActivityTime)
+    return
 
-# If we reconnect and we were idle, make sure we send that upstream
-wasConnected = Meteor.status().connected
-Deps.autorun ->
-  connected = Meteor.status().connected
-  # We only need to do something if we reconnect and we are idle
-  # Don't get idle status reactively, as this function only
-  # takes care of reconnect status and doesn't care if it changes.
+  # If we reconnect and we were idle, make sure we send that upstream
+  wasConnected = Meteor.status().connected
+  Deps.autorun ->
+    connected = Meteor.status().connected
+    MonitorInternals.connectionChange(connected, wasConnected)
 
-  # Note that userId does not change during a resume login, as designed by Meteor.
-  # However, a not logged in user will just have this method ignored by the server.
-  # TODO when we support anonymous sessions, make sure this still works
-  if connected and !wasConnected and idle
-    Meteor.call "user-status-idle", lastActivityTime
-
-  wasConnected = connected
-  return
+    wasConnected = connected
+    return
 
 # export functions for starting and stopping idle monitor
 UserStatus = {
@@ -174,3 +189,4 @@ UserStatus = {
   isMonitoring: isMonitoring
   lastActivity: lastActivity
 }
+
