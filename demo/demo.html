@@ -33,27 +33,17 @@
     {{#if loggedIn}}
     <h3>You are logged in as:</h3>
     {{> loginButtons}}
+    {{else}}
+    <form class="form-inline">
+        <p>Enter username to log in:</p>
+        {{! We use the pattern below because it matches \w in in autocomplete for user names}}
+        <input class="form-control" type="text" name="username" required
+               pattern="^[a-zA-Z][a-zA-Z0-9_]{5,12}$"
+               placeholder="Username..."
+               title="6-13 numbers or characters.">
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
     {{/if}}
-</template>
-
-<template name="requestUsername">
-    <div class="modal-dialog">
-    <div class="modal-content">
-    <div class="modal-header">
-        <h3>Please enter a username to log in.</h3>
-    </div>
-    <div class="modal-body">
-        <form class="form-inline">
-            {{! We use the pattern below because it matches \w in in autocomplete for user names}}
-            <input class="form-control" type="text" name="username" required
-                   pattern="^[a-zA-Z][a-zA-Z0-9_]{5,12}$"
-                   placeholder="Username..."
-                   title="6-13 numbers or characters.">
-            <button type="submit" class="btn btn-primary">Continue</button>
-        </form>
-    </div>
-    </div>
-    </div>
 </template>
 
 <template name="status">
@@ -103,6 +93,9 @@
             </tr>
         </thead>
         <tbody>
+        {{#each anonymous}}
+        {{> serverConnection}}
+        {{/each}}
         {{#each users}}
             <tr class="bold {{userClass}}">
                 <td colspan="2">{{username}}<br>(last login {{lastLogin}})</td>
@@ -119,7 +112,7 @@
 
 <template name="serverConnection">
     <tr class="{{connectionClass}}">
-        <td>{{_id}}<br>(login {{loginTime}})</td>
+        <td>{{_id}}{{#with loginTime}}<br>(login {{this}}){{/with}}</td>
         <td>{{ipAddr}}</td>
         <td>{{idle}}</td>
         <td>{{lastActivity}}</td>

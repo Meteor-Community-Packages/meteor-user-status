@@ -1,5 +1,7 @@
-## vNEXT
+## v0.5.0
 
+* All connections are tracked, including anonymous (not authenticated) ones. Idle monitoring is supported on anonymous connections, and idle state will persist across a login/logout.
+* The `Meteor.onConnection`, `connection.onClose`, and `Accounts.onLogin` functions are used to handle most changes in user state, except for logging out which is not directly supported in Meteor. This takes advantage of Meteor's new DDP heartbeats, and should improve issues with dangling connections caused by unclosed SockJS sockets.
 * Ensure that the last activity timestamp is reset when restarting the idle monitor after stopping it.
 * Add several unit tests for client-side idle monitoring logic.
 

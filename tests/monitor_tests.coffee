@@ -12,9 +12,6 @@ MonitorInternals.reportActive = (time) ->
     status: "active"
     time: time
 
-# For test purposes, pretend we are always logged in
-MonitorInternals.userId = -> "blahblahtest"
-
 # Test function wrapper that cleans up reported events array
 withCleanup = getCleanupWrapper
   before: ->

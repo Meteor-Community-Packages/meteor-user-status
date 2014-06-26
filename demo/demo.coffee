@@ -36,6 +36,7 @@ if Meteor.isClient
   Template.status.isIdle = -> @isIdle() || "false"
   Template.status.isMonitoring = -> @isMonitoring() || "false"
 
+  Template.serverStatus.anonymous = -> UserConnections.find(userId: $exists: false)
   Template.serverStatus.users = -> Meteor.users.find()
   Template.serverStatus.userClass = -> if @status?.idle then "warning" else "success"
 
@@ -54,7 +55,9 @@ if Meteor.isClient
   Template.serverStatus.connections = -> UserConnections.find(userId: @_id)
 
   Template.serverConnection.connectionClass = -> if @idle then "warning" else "success"
-  Template.serverConnection.loginTime = -> new Date(@loginTime).toLocaleString()
+  Template.serverConnection.loginTime = ->
+    return unless @loginTime?
+    new Date(@loginTime).toLocaleString()
   Template.serverConnection.lastActivity = ->
     lastActivity = @lastActivity
     if lastActivity?
@@ -62,31 +65,12 @@ if Meteor.isClient
     else
       return "(active or not monitoring)"
 
-  Template.requestUsername.events =
+  Template.login.events =
     "submit form": (e, tmpl) ->
       e.preventDefault()
       input = tmpl.find("input[name=username]")
       input.blur()
       Meteor.insecureUserLogin input.value, (err, res) -> console.log(err) if err
-
-  # Ask for a username as long as we're not logged in
-  usernameDialog = null
-
-  Meteor.startup ->
-    Deps.autorun ->
-      userId = Meteor.userId()
-      # Don't recompute this when status fields change
-      username = Meteor.users.findOne(userId, fields: {username: 1})?.username
-
-      if username and usernameDialog
-        usernameDialog.modal("hide")
-        usernameDialog = null
-        return
-
-      if !username and usernameDialog is null
-        usernameDialog = bootbox.dialog({ message: " " }).html('')
-        UI.insert UI.render(Template.requestUsername), usernameDialog[0]
-        return
 
   # Start monitor as soon as we got a signal, captain!
   Deps.autorun (c) ->

@@ -1,15 +1,13 @@
 {
   "packages": {
     "moment": {},
-    "bootboxjs": {},
     "timesync": {
       "path": "../../meteor-timesync"
     },
     "user-status": {
       "path": ".."
     },
-    "accounts-testing": {
-      "path": "../../../meteor-accounts-testing"
-    }
+    "accounts-testing": {},
+    "bootstrap-3": {}
   }
 }

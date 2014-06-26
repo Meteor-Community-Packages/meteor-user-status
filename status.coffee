@@ -13,10 +13,19 @@ statusEvents = new (Npm.require('events').EventEmitter)()
   Multiplex login/logout events to status.online
 ###
 statusEvents.on "connectionLogin", (advice) ->
-  Meteor.users.update advice.userId,
+  update =
     $set:
       'status.online': true,
       'status.lastLogin': advice.loginTime
+
+  # State change if ALL existing connections were idle, but this one isn't
+  conns = UserConnections.find(userId: advice.userId).fetch()
+  unless _.every(conns, (c) -> c.idle)
+    update.$unset =
+      'status.idle': null
+      'status.lastActivity': null
+
+  Meteor.users.update advice.userId, update
   return
 
 statusEvents.on "connectionLogout", (advice) ->
@@ -89,37 +98,52 @@ Meteor.startup ->
   Local session modifification functions - also used in testing
 ###
 
-addSession = (userId, connectionId, date, ipAddr) ->
-  UserConnections.upsert connectionId,
+addSession = (connection) ->
+  UserConnections.upsert connection.id,
+    $set: { ipAddr: connection.clientAddress }
+  return
+
+loginSession = (connection, date, userId) ->
+  UserConnections.upsert connection.id,
     $set: {
       userId: userId
-      ipAddr: ipAddr
       loginTime: date
     }
 
   statusEvents.emit "connectionLogin",
     userId: userId
-    connectionId: connectionId
-    ipAddr: ipAddr
+    connectionId: connection.id
+    ipAddr: connection.clientAddress
     loginTime: date
   return
 
-removeSession = (userId, connectionId, date) ->
-  conn = UserConnections.findOne(connectionId)
-  # Don't emit this again if the connection was already closed
-  return unless conn?
+# Possibly trigger a logout event if this connection was previously associated with a user ID
+tryLogoutSession = (connection, date) ->
+  return false unless (conn = UserConnections.findOne({
+    _id: connection.id
+    userId: { $exists: true }
+  }))?
 
-  UserConnections.remove(connectionId)
+  # Yes, this is actually a user logging out.
+  UserConnections.upsert connection.id,
+    $unset: {
+      userId: null
+      loginTime: null
+    }
 
   statusEvents.emit "connectionLogout",
-    userId: userId
-    connectionId: connectionId
-    lastActivity: conn?.lastActivity # If this connection was idle, pass the last activity we saw
+    userId: conn.userId
+    connectionId: connection.id
+    lastActivity: conn.lastActivity # If this connection was idle, pass the last activity we saw
     logoutTime: date
+
+removeSession = (connection, date) ->
+  tryLogoutSession(connection, date)
+  UserConnections.remove(connection.id)
   return
 
-idleSession = (userId, connectionId, date) ->
-  UserConnections.update connectionId,
+idleSession = (connection, date, userId) ->
+  UserConnections.update connection.id,
     $set: {
       idle: true
       lastActivity: date
@@ -127,71 +151,61 @@ idleSession = (userId, connectionId, date) ->
 
   statusEvents.emit "connectionIdle",
     userId: userId
-    connectionId: connectionId
+    connectionId: connection.id
     lastActivity: date
   return
 
-activeSession = (userId, connectionId, date) ->
-  UserConnections.update connectionId,
+activeSession = (connection, date, userId) ->
+  UserConnections.update connection.id,
     $set: { idle: false }
     $unset: { lastActivity: null }
 
   statusEvents.emit "connectionActive",
     userId: userId
-    connectionId: connectionId
+    connectionId: connection.id
     lastActivity: date
   return
 
-# pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
-# TODO: replace this with Meteor.onConnection and login hooks.
+###
+  Handlers for various client-side events
+###
 
+# Opening and closing of DDP connections
+Meteor.onConnection (connection) ->
+  addSession(connection)
+
+  connection.onClose ->
+    removeSession(connection, new Date())
+
+# Authentication of a DDP connection
+Accounts.onLogin (info) ->
+  loginSession(info.connection, new Date(), info.user._id)
+
+# pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
+# We used this in the past, but still need this to detect logouts on the same connection.
 Meteor.publish null, ->
   # Return null explicitly if this._session is not available, i.e.:
   # https://github.com/arunoda/meteor-fast-render/issues/41
-  return null unless @_session
+  return [] unless @_session?
 
-  date = new Date() # compute this as early as possible
-  userId = @_session.userId
-  return null unless @_session.socket? # Or there is nothing to close!
+  # We're interested in logout events - re-publishes for which a past connection exists
+  tryLogoutSession(@_session.connectionHandle, new Date()) unless @userId?
 
-  connection = @_session.connectionHandle
-  connectionId = @_session.id # same as connection.id
+  return []
 
-  # Untrack connection on logout
-  unless userId?
-    # TODO: this could be replaced with a findAndModify once it's supported on Collections
-    existing = UserConnections.findOne(connectionId)
-    return null unless existing? # Probably new session
-
-    removeSession(existing.userId, connectionId, date)
-    return null
-
-  # Add socket to open connections
-  addSession(userId, connectionId, date, connection.clientAddress)
-
-  # Remove socket on close
-  @_session.socket.on "close", Meteor.bindEnvironment ->
-    removeSession(userId, connectionId, new Date())
-  , (e) ->
-    Meteor._debug "Exception from connection close callback:", e
-  return null
-
-# TODO the below methods only care about logged in users.
-# We can extend this to all users. (See also client code)
-# We can trust the timestamp here because it was sent from a TimeSync value.
+# We can use the client's timestamp here because it was sent from a TimeSync value,
+# however we should never trust it for something security dependent.
 Meteor.methods
   "user-status-idle": (timestamp) ->
-    return unless @userId
-    idleSession(@userId, @connection.id, new Date(timestamp))
+    idleSession(@connection, new Date(timestamp), @userId)
     return
 
   "user-status-active": (timestamp) ->
-    return unless @userId
     # We only use timestamp because it's when we saw activity *on the client*
     # as opposed to just being notified it.
     # It is probably more accurate even if a few hundred ms off
     # due to how long the message took to get here.
-    activeSession(@userId, @connection.id, new Date(timestamp))
+    activeSession(@connection, new Date(timestamp), @userId)
     return
 
 # Exported variable
@@ -200,8 +214,11 @@ UserStatus =
   events: statusEvents
 
 # Internal functions, exported for testing
-StatusInternals =
-  addSession: addSession
-  removeSession: removeSession
-  idleSession: idleSession
-  activeSession: activeSession
+StatusInternals = {
+  addSession,
+  removeSession,
+  loginSession,
+  tryLogoutSession,
+  idleSession,
+  activeSession,
+}

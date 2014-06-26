@@ -1,3 +1,12 @@
+###
+  Manual tests to do:
+
+  logged out -> logged in
+  logged in -> logged out
+  logged in -> close session -> reopen
+  logged in -> connection timeout
+###
+
 if Meteor.isServer
   # Publish status to client
   Meteor.publish null, -> Meteor.users.find {},
@@ -34,8 +43,8 @@ if Meteor.isClient
 
       doc = res[0]
       test.equal doc.userId, Meteor.userId()
-      test.isFalse(doc.ipAddr is undefined)
-      test.isFalse(doc.loginTime is undefined)
+      test.isTrue doc.ipAddr?
+      test.isTrue doc.loginTime?
       next()
 
   Tinytest.addAsync "status - online recorded on client", (test, next) ->
@@ -59,8 +68,14 @@ if Meteor.isClient
       test.isTrue user.status.lastLogin?
       next()
 
-  Tinytest.addAsync "status - session deleted on server", (test, next) ->
+  Tinytest.addAsync "status - session userId deleted on server", (test, next) ->
     Meteor.call "grabSessions", (err, res) ->
       test.isUndefined err
-      test.length res, 0
+      test.length res, 1
+
+      doc = res[0]
+      test.isFalse doc.userId?
+      test.isTrue doc.ipAddr?
+      test.isFalse doc.loginTime?
+
       next()
