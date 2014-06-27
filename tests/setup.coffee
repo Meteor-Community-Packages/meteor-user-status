@@ -1,6 +1,7 @@
 if Meteor.isServer
   @TEST_username = "status_test"
   @TEST_userId = undefined
+  @TEST_IP = "255.255.255.0"
 
   unless (@TEST_userId = Meteor.users.findOne(username: TEST_username)?._id)
     @TEST_userId = Meteor.users.insert username: TEST_username

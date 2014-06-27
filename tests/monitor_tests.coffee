@@ -69,6 +69,13 @@ Tinytest.add "monitor - idle above threshold", (test) ->
   # Shouldn't change if we go out of focus
   test.equal MonitorInternals.computeState(activity, newTime, false), true
 
+# We need to wait for TimeSync to run or errors will ensue.
+Tinytest.addAsync "monitor - wait for timesync", (test, next) ->
+  Deps.autorun (c) ->
+    if TimeSync.isSynced()
+      c.stop()
+      next()
+
 Tinytest.add "monitor - start with default settings", withCleanup (test) ->
   UserStatus.startMonitor()
 
