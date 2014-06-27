@@ -33,8 +33,8 @@ if Meteor.isClient
   Template.status.serverTime = -> new Date(TimeSync.serverTime()).toLocaleString()
   Template.status.serverOffset = TimeSync.serverOffset
   Template.status.serverRTT = TimeSync.roundTripTime
-  Template.status.isIdle = -> @isIdle() || "false"
-  Template.status.isMonitoring = -> @isMonitoring() || "false"
+  Template.status.isIdleText = -> @isIdle() || "false"
+  Template.status.isMonitoringText = -> @isMonitoring() || "false"
 
   Template.serverStatus.anonymous = -> UserConnections.find(userId: $exists: false)
   Template.serverStatus.users = -> Meteor.users.find()
