@@ -34,9 +34,7 @@ MonitorInternals = {
     # takes care of reconnect status and doesn't care if it changes.
 
     # Note that userId does not change during a resume login, as designed by Meteor.
-    # However, a not logged in user will just have this method ignored by the server.
-
-    # TODO when we support anonymous sessions, make sure this still works
+    # However, the idle state is tied to the connection and not the userId.
     if isConnected and !wasConnected and idle
       MonitorInternals.reportIdle(lastActivityTime)
 
@@ -107,7 +105,8 @@ monitor = (setAction) ->
 
   # We use setAction here to not have to call serverTime twice. Premature optimization?
   currentTime = Deps.nonreactive -> TimeSync.serverTime()
-  return unless currentTime? # Can't monitor if we haven't synced with server yet.
+  # Can't monitor if we haven't synced with server yet, or lost our sync.
+  return unless currentTime?
 
   # Update action as long as we're not blurred and idling on blur
   # We ignore actions that happen while a client is blurred, if idleOnBlur is set.

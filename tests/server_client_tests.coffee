@@ -25,9 +25,16 @@ if Meteor.isServer
       }).fetch()
 
 if Meteor.isClient
+
+  timeTol = 500 # The maximum tolerance we expect in client-server tests
+  loginTime = null
+  idleTime = null
+
+  # Monitor tests will wait for timesync, so we don't need to here.
   Tinytest.addAsync "status - login", (test, next) ->
     InsecureLogin.ready ->
       test.ok()
+      loginTime = new Date(TimeSync.serverTime())
       next()
 
   # Check that initialization is empty
@@ -39,7 +46,11 @@ if Meteor.isClient
       user = res[0]
       test.equal user._id, Meteor.userId()
       test.equal user.status.online, true
-      test.isTrue user.status.lastLogin?
+      test.isTrue Math.abs(user.status.lastLogin - loginTime) < timeTol
+
+      test.isFalse user.status.idle?
+      test.isFalse user.status.lastActivity?
+
       next()
 
   Tinytest.addAsync "status - session recorded on server", (test, next) ->
@@ -50,12 +61,98 @@ if Meteor.isClient
       doc = res[0]
       test.equal doc.userId, Meteor.userId()
       test.isTrue doc.ipAddr?
-      test.isTrue doc.loginTime?
+      test.isTrue Math.abs(doc.loginTime - loginTime) < timeTol
+
+      test.isFalse doc.idle?
+      test.isFalse doc.lastActivity?
+
       next()
 
   Tinytest.addAsync "status - online recorded on client", (test, next) ->
     test.equal Meteor.user().status.online, true
     next()
+
+  Tinytest.addAsync "status - idle report to server", (test, next) ->
+    now = TimeSync.serverTime()
+    idleTime = new Date(now)
+
+    Meteor.call "user-status-idle", now, (err, res) ->
+      test.isUndefined err
+
+      # Testing grabStatus should be sufficient to ensure that sessions work
+      Meteor.call "grabStatus", (err, res) ->
+        test.isUndefined err
+        test.length res, 1
+
+        user = res[0]
+        test.equal user._id, Meteor.userId()
+        test.equal user.status.online, true
+        test.equal user.status.idle, true
+        test.isTrue user.status.lastLogin?
+        # This should be the exact date we sent to the server
+        test.equal user.status.lastActivity, idleTime
+
+        next()
+
+  Tinytest.addAsync "status - active report to server", (test, next) ->
+    now = TimeSync.serverTime()
+
+    Meteor.call "user-status-active", now, (err, res) ->
+      test.isUndefined err
+
+      Meteor.call "grabStatus", (err, res) ->
+        test.isUndefined err
+        test.length res, 1
+
+        user = res[0]
+        test.equal user._id, Meteor.userId()
+        test.equal user.status.online, true
+        test.isTrue user.status.lastLogin?
+
+        test.isFalse user.status.idle?
+        test.isFalse user.status.lastActivity?
+
+        next()
+
+  Tinytest.addAsync "status - idle report with no timestamp", (test, next) ->
+    now = TimeSync.serverTime()
+    idleTime = new Date(now)
+
+    Meteor.call "user-status-idle", undefined, (err, res) ->
+      test.isUndefined err
+
+      Meteor.call "grabStatus", (err, res) ->
+        test.isUndefined err
+        test.length res, 1
+
+        user = res[0]
+        test.equal user._id, Meteor.userId()
+        test.equal user.status.online, true
+        test.equal user.status.idle, true
+        test.isTrue user.status.lastLogin?
+        # This will be approximate
+        test.isTrue Math.abs(user.status.lastActivity - idleTime) < timeTol
+
+        next()
+
+  Tinytest.addAsync "status - active report with no timestamp", (test, next) ->
+
+    Meteor.call "user-status-active", undefined, (err, res) ->
+      test.isUndefined err
+
+      Meteor.call "grabStatus", (err, res) ->
+        test.isUndefined err
+        test.length res, 1
+
+        user = res[0]
+        test.equal user._id, Meteor.userId()
+        test.equal user.status.online, true
+        test.isTrue user.status.lastLogin?
+
+        test.isFalse user.status.idle?
+        test.isFalse user.status.lastActivity?
+
+        next()
 
   Tinytest.addAsync "status - logout", (test, next) ->
     Meteor.logout (err) ->
@@ -72,6 +169,10 @@ if Meteor.isClient
       test.equal user.status.online, false
       # logintime is still maintained
       test.isTrue user.status.lastLogin?
+
+      test.isFalse user.status.idle?
+      test.isFalse user.status.lastActivity?
+
       next()
 
   Tinytest.addAsync "status - session userId deleted on server", (test, next) ->
@@ -83,5 +184,8 @@ if Meteor.isClient
       test.isFalse doc.userId?
       test.isTrue doc.ipAddr?
       test.isFalse doc.loginTime?
+
+      test.isFalse doc.idle # === false
+      test.isFalse doc.lastActivity?
 
       next()

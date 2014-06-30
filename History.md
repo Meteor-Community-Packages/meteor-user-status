@@ -1,3 +1,7 @@
+## vNEXT
+
+* Better handling of idle/active events if TimeSync loses its computed offset temporarily due to a clock change.
+
 ## v0.5.0
 
 * All connections are tracked, including anonymous (not authenticated) ones. Idle monitoring is supported on anonymous connections, and idle state will persist across a login/logout. (#22)

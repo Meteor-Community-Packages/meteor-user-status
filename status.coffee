@@ -193,19 +193,21 @@ Meteor.publish null, ->
 
   return []
 
-# We can use the client's timestamp here because it was sent from a TimeSync value,
-# however we should never trust it for something security dependent.
+# We can use the client's timestamp here because it was sent from a TimeSync
+# value, however we should never trust it for something security dependent.
+# If timestamp is not provided (probably due to a desync), use server time.
 Meteor.methods
   "user-status-idle": (timestamp) ->
-    idleSession(@connection, new Date(timestamp), @userId)
+    date = if timestamp? then new Date(timestamp) else new Date()
+    idleSession(@connection, date, @userId)
     return
 
   "user-status-active": (timestamp) ->
     # We only use timestamp because it's when we saw activity *on the client*
-    # as opposed to just being notified it.
-    # It is probably more accurate even if a few hundred ms off
-    # due to how long the message took to get here.
-    activeSession(@connection, new Date(timestamp), @userId)
+    # as opposed to just being notified it. It is probably more accurate even if
+    # a dozen ms off due to the latency of sending it to the server.
+    date = if timestamp? then new Date(timestamp) else new Date()
+    activeSession(@connection, date, @userId)
     return
 
 # Exported variable
