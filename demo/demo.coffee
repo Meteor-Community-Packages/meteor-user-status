@@ -35,6 +35,7 @@ if Meteor.isClient
   Template.status.serverTime = -> new Date(TimeSync.serverTime()).toLocaleString()
   Template.status.serverOffset = TimeSync.serverOffset
   Template.status.serverRTT = TimeSync.roundTripTime
+  # Falsy values aren't rendered in templates, so let's render them ourself
   Template.status.isIdleText = -> @isIdle() || "false"
   Template.status.isMonitoringText = -> @isMonitoring() || "false"
 
