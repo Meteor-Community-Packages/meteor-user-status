@@ -1,5 +1,7 @@
-## vNEXT
+## v0.6.0
 
+* Connections now record user agents - useful for diagnostic purposes. See the demo at http://user-status.meteor.com/.
+* The `lastLogin` field of documents in `Meteor.users` is **no longer a date**; it is an object with fields `date`, `ipAddr`, and `userAgent`. **Use `lastLogin.date` instead of simply `lastlogin` if you were depending on this behavior.** This provides a quick way to display connected users' IPs and UAs for administration or diagnostic purposes.
 * Better handling of idle/active events if TimeSync loses its computed offset temporarily due to a clock change.
 
 ## v0.5.0

@@ -26,7 +26,9 @@ if Meteor.isServer
 
 if Meteor.isClient
 
-  timeTol = 500 # The maximum tolerance we expect in client-server tests
+  # The maximum tolerance we expect in client-server tests
+  # TODO why must this be so large?
+  timeTol = 1000
   loginTime = null
   idleTime = null
 
@@ -46,7 +48,12 @@ if Meteor.isClient
       user = res[0]
       test.equal user._id, Meteor.userId()
       test.equal user.status.online, true
-      test.isTrue Math.abs(user.status.lastLogin - loginTime) < timeTol
+
+      test.isTrue Math.abs(user.status.lastLogin.date - loginTime) < timeTol
+
+      # TODO: user-agent doesnt' seem to match up in phantomjs for some reason
+      unless Package['test-in-console']?
+        test.equal user.status.lastLogin.userAgent, navigator.userAgent
 
       test.isFalse user.status.idle?
       test.isFalse user.status.lastActivity?
@@ -62,6 +69,9 @@ if Meteor.isClient
       test.equal doc.userId, Meteor.userId()
       test.isTrue doc.ipAddr?
       test.isTrue Math.abs(doc.loginTime - loginTime) < timeTol
+
+      unless Package['test-in-console']?
+        test.equal doc.userAgent, navigator.userAgent
 
       test.isFalse doc.idle?
       test.isFalse doc.lastActivity?

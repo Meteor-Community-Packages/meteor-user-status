@@ -9,9 +9,17 @@ UserStatus.events.on "connectionLogout", (advice) -> lastLogoutAdvice = advice
 UserStatus.events.on "connectionIdle", (advice) -> lastIdleAdvice = advice
 UserStatus.events.on "connectionActive", (advice) -> lastActiveAdvice = advice
 
+TEST_UA = "old-ass browser"
+
 # Make sure repeated calls to this return different values
 delayedDate = ->
   Meteor._wrapAsync((cb) -> Meteor.setTimeout (-> cb undefined, new Date()), 1)()
+
+randomConnection = ->
+  id: Random.id()
+  clientAddress: TEST_IP
+  httpHeaders:
+    "user-agent": TEST_UA
 
 # Delete the entire status field and sessions after each test
 withCleanup = getCleanupWrapper
@@ -36,9 +44,7 @@ withCleanup = getCleanupWrapper
 withCleanup ->
 
 Tinytest.add "status - adding anonymous session", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
 
   StatusInternals.addSession(conn)
 
@@ -47,13 +53,12 @@ Tinytest.add "status - adding anonymous session", withCleanup (test) ->
   test.isTrue doc?
   test.equal doc._id, conn.id
   test.equal doc.ipAddr, TEST_IP
+  test.equal doc.userAgent, TEST_UA
   test.isFalse doc.userId
   test.isFalse doc.loginTime
 
 Tinytest.add "status - adding and removing anonymous session", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
 
   StatusInternals.addSession(conn)
   StatusInternals.removeSession conn, delayedDate()
@@ -61,9 +66,7 @@ Tinytest.add "status - adding and removing anonymous session", withCleanup (test
   test.isFalse UserStatus.connections.findOne(conn.id)
 
 Tinytest.add "status - adding one authenticated session", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
   ts = delayedDate()
 
   StatusInternals.addSession(conn)
@@ -77,19 +80,20 @@ Tinytest.add "status - adding one authenticated session", withCleanup (test) ->
   test.equal doc.userId, TEST_userId
   test.equal doc.loginTime, ts
   test.equal doc.ipAddr, TEST_IP
+  test.equal doc.userAgent, TEST_UA
 
   test.equal lastLoginAdvice.userId, TEST_userId
   test.equal lastLoginAdvice.connectionId, conn.id
   test.equal lastLoginAdvice.loginTime, ts
   test.equal lastLoginAdvice.ipAddr, TEST_IP
+  test.equal lastLoginAdvice.userAgent, TEST_UA
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, ts
+  test.equal user.status.lastLogin.date, ts
+  test.equal user.status.lastLogin.userAgent, TEST_UA
 
 Tinytest.add "status - adding and removing one authenticated session", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
   ts = delayedDate()
 
   StatusInternals.addSession conn
@@ -109,12 +113,10 @@ Tinytest.add "status - adding and removing one authenticated session", withClean
   test.isFalse lastLogoutAdvice.lastActivity?
 
   test.equal user.status.online, false
-  test.equal user.status.lastLogin, ts
+  test.equal user.status.lastLogin.date, ts
 
 Tinytest.add "status - logout and then close one authenticated session", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
   ts = delayedDate()
 
   StatusInternals.addSession conn
@@ -141,12 +143,10 @@ Tinytest.add "status - logout and then close one authenticated session", withCle
   test.isFalse lastLogoutAdvice?
 
   test.equal user.status.online, false
-  test.equal user.status.lastLogin, ts
+  test.equal user.status.lastLogin.date, ts
 
 Tinytest.add "status - idling one authenticated session", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
   ts = delayedDate()
 
   StatusInternals.addSession conn
@@ -164,6 +164,7 @@ Tinytest.add "status - idling one authenticated session", withCleanup (test) ->
   test.equal doc.userId, TEST_userId
   test.equal doc.loginTime, ts
   test.equal doc.ipAddr, TEST_IP
+  test.equal doc.userAgent, TEST_UA
   test.equal doc.idle, true
   test.equal doc.lastActivity, idleTime
 
@@ -172,14 +173,12 @@ Tinytest.add "status - idling one authenticated session", withCleanup (test) ->
   test.equal lastIdleAdvice.lastActivity, idleTime
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, ts
+  test.equal user.status.lastLogin.date, ts
   test.equal user.status.idle, true
   test.equal user.status.lastActivity, idleTime
 
 Tinytest.add "status - idling and reactivating one authenticated session", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
   ts = delayedDate()
 
   StatusInternals.addSession conn
@@ -198,6 +197,7 @@ Tinytest.add "status - idling and reactivating one authenticated session", withC
   test.equal doc.userId, TEST_userId
   test.equal doc.loginTime, ts
   test.equal doc.ipAddr, TEST_IP
+  test.equal doc.userAgent, TEST_UA
   test.equal doc.idle, false
   test.isFalse doc.lastActivity?
 
@@ -206,14 +206,12 @@ Tinytest.add "status - idling and reactivating one authenticated session", withC
   test.equal lastActiveAdvice.lastActivity, activeTime
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, ts
+  test.equal user.status.lastLogin.date, ts
   test.isFalse user.status.idle?,
   test.isFalse user.status.lastActivity?
 
 Tinytest.add "status - idling and removing one authenticated session", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
   ts = delayedDate()
 
   StatusInternals.addSession conn
@@ -234,12 +232,10 @@ Tinytest.add "status - idling and removing one authenticated session", withClean
   test.equal lastLogoutAdvice.lastActivity, idleTime
 
   test.equal user.status.online, false
-  test.equal user.status.lastLogin, ts
+  test.equal user.status.lastLogin.date, ts
 
 Tinytest.add "status - idling and reconnecting one authenticated session", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
   ts = delayedDate()
 
   StatusInternals.addSession conn
@@ -252,9 +248,7 @@ Tinytest.add "status - idling and reconnecting one authenticated session", withC
   discTime = delayedDate()
   StatusInternals.removeSession conn, discTime
 
-  reconn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  reconn = randomConnection()
   reconnTime = delayedDate()
 
   StatusInternals.addSession reconn
@@ -269,22 +263,19 @@ Tinytest.add "status - idling and reconnecting one authenticated session", withC
   test.equal doc.userId, TEST_userId
   test.equal doc.loginTime, reconnTime
   test.equal doc.ipAddr, TEST_IP
+  test.equal doc.userAgent, TEST_UA
   test.equal doc.idle, true
   test.equal doc.lastActivity, idleTime
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, reconnTime
+  test.equal user.status.lastLogin.date, reconnTime
   test.equal user.status.idle, true
   test.equal user.status.lastActivity, idleTime
 
 Tinytest.add "multiplex - two online sessions", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
 
-  conn2 =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn2 = randomConnection()
 
   ts = delayedDate()
   ts2 = delayedDate()
@@ -298,16 +289,12 @@ Tinytest.add "multiplex - two online sessions", withCleanup (test) ->
   user = Meteor.users.findOne TEST_userId
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, ts2
+  test.equal user.status.lastLogin.date, ts2
 
 Tinytest.add "multiplex - two online sessions with one going offline", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
 
-  conn2 =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn2 = randomConnection()
 
   ts = delayedDate()
   ts2 = delayedDate()
@@ -323,16 +310,12 @@ Tinytest.add "multiplex - two online sessions with one going offline", withClean
   user = Meteor.users.findOne TEST_userId
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, ts2
+  test.equal user.status.lastLogin.date, ts2
 
 Tinytest.add "multiplex - two online sessions to offline", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
 
-  conn2 =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn2 = randomConnection()
 
   ts = delayedDate()
   ts2 = delayedDate()
@@ -349,16 +332,12 @@ Tinytest.add "multiplex - two online sessions to offline", withCleanup (test) ->
   user = Meteor.users.findOne TEST_userId
 
   test.equal user.status.online, false
-  test.equal user.status.lastLogin, ts2
+  test.equal user.status.lastLogin.date, ts2
 
 Tinytest.add "multiplex - idling one of two online sessions", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
 
-  conn2 =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn2 = randomConnection()
 
   ts = delayedDate()
   ts2 = delayedDate()
@@ -375,17 +354,13 @@ Tinytest.add "multiplex - idling one of two online sessions", withCleanup (test)
   user = Meteor.users.findOne TEST_userId
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, ts2
+  test.equal user.status.lastLogin.date, ts2
   test.isFalse user.status.idle?
 
 Tinytest.add "multiplex - idling two online sessions", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
 
-  conn2 =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn2 = randomConnection()
 
   ts = delayedDate()
   ts2 = delayedDate()
@@ -404,18 +379,14 @@ Tinytest.add "multiplex - idling two online sessions", withCleanup (test) ->
   user = Meteor.users.findOne TEST_userId
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, ts2
+  test.equal user.status.lastLogin.date, ts2
   test.equal user.status.idle, true
   test.equal user.status.lastActivity, idle2
 
 Tinytest.add "multiplex - idling two then reactivating one session", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
 
-  conn2 =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn2 = randomConnection()
 
   ts = delayedDate()
   ts2 = delayedDate()
@@ -436,18 +407,14 @@ Tinytest.add "multiplex - idling two then reactivating one session", withCleanup
   user = Meteor.users.findOne TEST_userId
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, ts2
+  test.equal user.status.lastLogin.date, ts2
   test.isFalse user.status.idle?
   test.isFalse user.status.lastActivity?
 
 Tinytest.add "multiplex - logging in while an existing session is idle", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
 
-  conn2 =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn2 = randomConnection()
 
   ts = delayedDate()
   ts2 = delayedDate()
@@ -464,18 +431,15 @@ Tinytest.add "multiplex - logging in while an existing session is idle", withCle
   user = Meteor.users.findOne TEST_userId
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, ts2
+  test.equal user.status.lastLogin.date, ts2
   test.isFalse user.status.idle?
   test.isFalse user.status.lastActivity?
 
 Tinytest.add "multiplex - simulate tab switch", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
 
-  conn2 =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn2 = randomConnection()
+
   ts = delayedDate()
   ts2 = delayedDate()
 
@@ -498,19 +462,15 @@ Tinytest.add "multiplex - simulate tab switch", withCleanup (test) ->
   user = Meteor.users.findOne TEST_userId
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, ts2
+  test.equal user.status.lastLogin.date, ts2
   test.isFalse user.status.idle?
   test.isFalse user.status.lastActivity?
 
 # Test for idling one session across a disconnection; not most recent idle time
 Tinytest.add "multiplex - disconnection and reconnection while idle", withCleanup (test) ->
-  conn =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn = randomConnection()
 
-  conn2 =
-    id: Random.id()
-    clientAddress: TEST_IP
+  conn2 = randomConnection()
 
   ts = delayedDate()
   ts2 = delayedDate()
@@ -532,13 +492,11 @@ Tinytest.add "multiplex - disconnection and reconnection while idle", withCleanu
   user = Meteor.users.findOne TEST_userId
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, ts2
+  test.equal user.status.lastLogin.date, ts2
   test.equal user.status.idle, true
   test.equal user.status.lastActivity, idle2
 
-  reconn2 =
-    id: Random.id()
-    clientAddress: TEST_IP
+  reconn2 = randomConnection()
 
   ts3 = delayedDate()
   StatusInternals.addSession reconn2
@@ -549,7 +507,7 @@ Tinytest.add "multiplex - disconnection and reconnection while idle", withCleanu
   user = Meteor.users.findOne TEST_userId
 
   test.equal user.status.online, true
-  test.equal user.status.lastLogin, ts3
+  test.equal user.status.lastLogin.date, ts3
   test.equal user.status.idle, true
   test.equal user.status.lastActivity, idle2
 

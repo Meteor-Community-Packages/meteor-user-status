@@ -14,9 +14,14 @@ statusEvents = new (Npm.require('events').EventEmitter)()
 ###
 statusEvents.on "connectionLogin", (advice) ->
   update =
-    $set:
+    $set: {
       'status.online': true,
-      'status.lastLogin': advice.loginTime
+      'status.lastLogin': {
+        date: advice.loginTime
+        ipAddr: advice.ipAddr
+        userAgent: advice.userAgent
+      }
+    }
 
   # State change if ALL existing connections were idle, but this one isn't
   conns = UserConnections.find(userId: advice.userId).fetch()
@@ -100,7 +105,10 @@ Meteor.startup ->
 
 addSession = (connection) ->
   UserConnections.upsert connection.id,
-    $set: { ipAddr: connection.clientAddress }
+    $set: {
+      ipAddr: connection.clientAddress
+      userAgent: connection.httpHeaders['user-agent']
+    }
   return
 
 loginSession = (connection, date, userId) ->
@@ -114,6 +122,7 @@ loginSession = (connection, date, userId) ->
     userId: userId
     connectionId: connection.id
     ipAddr: connection.clientAddress
+    userAgent: connection.httpHeaders['user-agent']
     loginTime: date
   return
 

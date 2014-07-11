@@ -1,14 +1,16 @@
 if Meteor.isClient
   @UserConnections = new Meteor.Collection("user_status_sessions")
 
-  Handlebars.registerHelper "userStatus", UserStatus
-
   relativeTime = (timeAgo) ->
     diff = moment.utc(TimeSync.serverTime() - timeAgo)
     time = diff.format("H:mm:ss")
     days = +diff.format("DDD") - 1
     ago = (if days then days + "d " else "") + time
-    return new Date(timeAgo).toLocaleString() + " - " + ago + " ago"
+    return ago + " ago"
+
+  Handlebars.registerHelper "userStatus", UserStatus
+  Handlebars.registerHelper "localeTime", (date) -> date?.toLocaleString()
+  Handlebars.registerHelper "relativeTime", relativeTime
 
   Template.login.loggedIn = -> Meteor.userId()
 
@@ -40,30 +42,12 @@ if Meteor.isClient
   Template.serverStatus.users = -> Meteor.users.find()
   Template.serverStatus.userClass = -> if @status?.idle then "warning" else "success"
 
-  Template.serverStatus.lastLogin = ->
-    lastLogin = @status?.lastLogin
-    return unless lastLogin?
-    return new Date(lastLogin).toLocaleString()
-
-  Template.serverStatus.lastActivity = ->
-    lastActivity = @status?.lastActivity
-    if lastActivity?
-      return relativeTime lastActivity
-    else
-      return "(active or not monitoring)"
-
   Template.serverStatus.connections = -> UserConnections.find(userId: @_id)
 
   Template.serverConnection.connectionClass = -> if @idle then "warning" else "success"
   Template.serverConnection.loginTime = ->
     return unless @loginTime?
     new Date(@loginTime).toLocaleString()
-  Template.serverConnection.lastActivity = ->
-    lastActivity = @lastActivity
-    if lastActivity?
-      return relativeTime lastActivity
-    else
-      return "(active or not monitoring)"
 
   Template.login.events =
     "submit form": (e, tmpl) ->

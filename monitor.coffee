@@ -142,6 +142,7 @@ lastActivity = ->
 
 Meteor.startup ->
   # Listen for mouse and keyboard events on window
+  # TODO other stuff - e.g. touch events?
   $(window).on "click keydown", -> monitor(true)
 
   # catch window blur events when requested and where supported

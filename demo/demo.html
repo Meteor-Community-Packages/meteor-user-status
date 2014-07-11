@@ -87,9 +87,10 @@
         <thead>
             <tr>
                 <th>Username/Connection</th>
-                <th>IP</th>
                 <th>Idle</th>
                 <th>Last Activity</th>
+                <th>IP (<i>Last</i>)</th>
+                <th style="width: 256px">User Agent (<i>Last</i>)</th>
             </tr>
         </thead>
         <tbody>
@@ -98,9 +99,16 @@
         {{/each}}
         {{#each users}}
             <tr class="bold {{userClass}}">
-                <td colspan="2">{{username}}<br>(last login {{lastLogin}})</td>
+                <td>{{username}}<br>(last login {{localeTime status.lastLogin.date}})</td>
                 <td>{{status.idle}}</td>
-                <td>{{lastActivity}}</td>
+                <td>{{#with status.lastActivity}}
+                    {{> relTime}}
+                    {{else}}
+                    (active or not monitoring)
+                    {{/with}}
+                </td>
+                <td><i>{{status.lastLogin.ipAddr}}</i></td>
+                <td><i>{{status.lastLogin.userAgent}}</i></td>
             </tr>
             {{#each connections}}
             {{> serverConnection}}
@@ -113,8 +121,20 @@
 <template name="serverConnection">
     <tr class="{{connectionClass}}">
         <td>{{_id}}{{#with loginTime}}<br>(login {{this}}){{/with}}</td>
-        <td>{{ipAddr}}</td>
         <td>{{idle}}</td>
-        <td>{{lastActivity}}</td>
+        <td>{{#with lastActivity}}
+            {{> relTime}}
+            {{else}}
+            (active or not monitoring)
+            {{/with}}
+        </td>
+        <td>{{ipAddr}}</td>
+        <td>{{userAgent}}</td>
     </tr>
+</template>
+
+<template name="relTime">
+    {{localeTime this}}
+    <br>
+    ({{relativeTime this}})
 </template>
