@@ -33,7 +33,7 @@ $ mrt add user-status
 
 This package maintains two types of status: a general user online flag in `Meteor.users`, and some additional data for each session. It uses [timesync](https://github.com/mizzao/meteor-timesync) to maintain the server's time across all clients, regardless of whether they have the correct time.
 
-`Meteor.users` receives a `status` field will be updated automatically if the user logs in or logs out, closes their browser, or otherwise disconnects (anonymous users are not tracked.) A user is online if at least one connection with that `userId` is logged in. It contains the following fields:
+`Meteor.users` receives a `status` field will be updated automatically if the user logs in or logs out, closes their browser, or otherwise disconnects. A user is online if at least one connection with that `userId` is logged in. It contains the following fields:
 
 - `online`: `true` if there is at least one connection online for this user
 - `lastLogin`: information about the most recent login of the user, with the fields `date`, `ipAddr`, and `userAgent`.
