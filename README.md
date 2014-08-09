@@ -23,10 +23,10 @@ maintainers).
 
 ## Install
 
-Install the smart package using **[meteorite](https://github.com/oortcloud/meteorite)**:
+Install using Meteor:
 
 ```sh
-$ mrt add user-status
+$ meteor add mizzao:user-status
 ```
 
 ## Basic Usage - Online State

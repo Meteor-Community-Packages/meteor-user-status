@@ -6,8 +6,8 @@
 standard-app-packages
 insecure
 coffeescript
-accounts-testing
-user-status
-timesync
-moment
-bootstrap-3
+mizzao:accounts-testing
+mizzao:user-status
+mizzao:timesync
+mrt:moment
+mrt:bootstrap-3

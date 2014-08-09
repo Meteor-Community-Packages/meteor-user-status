@@ -1,13 +1,10 @@
 {
   "packages": {
-    "moment": {},
-    "timesync": {
-      "path": "../../meteor-timesync"
+    "mizzao:timesync": {
+      "path": "../../mizzao:timesync"
     },
-    "user-status": {
+    "mizzao:user-status": {
       "path": ".."
-    },
-    "accounts-testing": {},
-    "bootstrap-3": {}
+    }
   }
 }

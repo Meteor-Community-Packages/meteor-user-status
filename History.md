@@ -1,3 +1,7 @@
+## v0.6.1
+
+* **Updated for Meteor 0.9.**
+
 ## v0.6.0
 
 * Connections now record user agents - useful for diagnostic purposes. See the demo at http://user-status.meteor.com/.

@@ -2,37 +2,19 @@
   "meteor": {},
   "dependencies": {
     "basePackages": {
-      "moment": {},
-      "timesync": {
-        "path": "../../meteor-timesync"
+      "mizzao:timesync": {
+        "path": "../../mizzao:timesync"
       },
-      "user-status": {
+      "mizzao:user-status": {
         "path": ".."
-      },
-      "accounts-testing": {},
-      "bootstrap-3": {}
+      }
     },
     "packages": {
-      "moment": {
-        "git": "https://github.com/acreeger/meteor-moment.git",
-        "tag": "v2.6.0",
-        "commit": "26156df681750fd6e6ed77043eef32b6653ebbdf"
+      "mizzao:timesync": {
+        "path": "../../mizzao:timesync"
       },
-      "timesync": {
-        "path": "../../meteor-timesync"
-      },
-      "user-status": {
+      "mizzao:user-status": {
         "path": ".."
-      },
-      "accounts-testing": {
-        "git": "https://github.com/mizzao/meteor-accounts-testing.git",
-        "tag": "v0.1.0",
-        "commit": "9dc6839693aced99e11ad66f05851a3cac718d26"
-      },
-      "bootstrap-3": {
-        "git": "https://github.com/mangasocial/meteor-bootstrap-3.git",
-        "tag": "v3.2.0-1",
-        "commit": "17a63902fc6cf1096c5289d963c66cf28b474727"
       }
     }
   }
