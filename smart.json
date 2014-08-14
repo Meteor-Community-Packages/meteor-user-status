@@ -1,4 +1,9 @@
 {
+  "packages": {
+    "mizzao:user-status": {
+      "path": "."
+    }
+  },
   "meteor": {
     "branch": "devel",
     "git": "https://github.com/meteor/meteor.git"
