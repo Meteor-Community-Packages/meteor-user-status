@@ -1,4 +1,5 @@
 Package.describe({
+  name: "mizzao:user-status",
   summary: "User connection and idle state tracking for Meteor",
   version: "0.6.1",
   git: "https://github.com/mizzao/meteor-user-status.git"
@@ -13,7 +14,7 @@ Package.onUse( function(api) {
   api.use(['deps', 'jquery'], 'client');
 
   // 0.2.2 is the first 0.9-compatible version
-  api.use('mizzao:timesync@>=0.2.2');
+  api.use('mizzao:timesync@0.2.2');
 
   api.add_files('monitor.coffee', 'client');
   api.add_files('status.coffee', 'server');
