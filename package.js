@@ -1,12 +1,12 @@
 Package.describe({
   name: "mizzao:user-status",
   summary: "User connection and idle state tracking for Meteor",
-  version: "0.6.1",
+  version: "0.6.2",
   git: "https://github.com/mizzao/meteor-user-status.git"
 });
 
 Package.onUse( function(api) {
-  api.versionsFrom("METEOR-CORE@0.9.0-atm");
+  api.versionsFrom("METEOR@0.9.0");
 
   api.use('accounts-base');
   api.use(['coffeescript', 'underscore']);
@@ -16,8 +16,8 @@ Package.onUse( function(api) {
   // 0.2.2 is the first 0.9-compatible version
   api.use('mizzao:timesync@0.2.2');
 
-  api.add_files('monitor.coffee', 'client');
-  api.add_files('status.coffee', 'server');
+  api.addFiles('monitor.coffee', 'client');
+  api.addFiles('status.coffee', 'server');
 
   api.export('UserStatus'); // on both
 
@@ -36,11 +36,11 @@ Package.onTest( function(api) {
   api.use('test-helpers');
   api.use('tinytest');
 
-  api.add_files("tests/insecure_login.js");
-  api.add_files('tests/setup.coffee');
+  api.addFiles("tests/insecure_login.js");
+  api.addFiles('tests/setup.coffee');
   // Just some unit tests here. Use the test app otherwise.
-  api.add_files('tests/monitor_tests.coffee', 'client');
-  api.add_files('tests/status_tests.coffee', 'server');
+  api.addFiles('tests/monitor_tests.coffee', 'client');
+  api.addFiles('tests/status_tests.coffee', 'server');
 
-  api.add_files('tests/server_client_tests.coffee');
+  api.addFiles('tests/server_client_tests.coffee');
 });

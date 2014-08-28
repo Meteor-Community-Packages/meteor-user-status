@@ -1,3 +1,7 @@
+## v0.6.2
+
+* Fix constraint syntax for the released Meteor 0.9.0.
+
 ## v0.6.1
 
 * **Updated for Meteor 0.9.**
