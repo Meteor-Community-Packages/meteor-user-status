@@ -1,5 +1,5 @@
 if Meteor.isClient
-  @UserConnections = new Meteor.Collection("user_status_sessions")
+  @UserConnections = new Mongo.Collection("user_status_sessions")
 
   relativeTime = (timeAgo) ->
     diff = moment.utc(TimeSync.serverTime() - timeAgo)

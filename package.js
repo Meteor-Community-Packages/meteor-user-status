@@ -10,6 +10,7 @@ Package.onUse( function(api) {
 
   api.use('accounts-base');
   api.use(['coffeescript', 'underscore']);
+  api.use('mongo');
 
   api.use(['deps', 'jquery'], 'client');
 

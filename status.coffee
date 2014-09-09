@@ -5,7 +5,7 @@
   We may want to make UserSessions a server collection to take advantage of indices.
   Will implement if someone has enough online users to warrant it.
 ###
-UserConnections = new Meteor.Collection("user_status_sessions", { connection: null })
+UserConnections = new Mongo.Collection("user_status_sessions", { connection: null })
 
 statusEvents = new (Npm.require('events').EventEmitter)()
 
