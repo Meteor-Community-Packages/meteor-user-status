@@ -207,6 +207,7 @@ Meteor.publish null, ->
 # If timestamp is not provided (probably due to a desync), use server time.
 Meteor.methods
   "user-status-idle": (timestamp) ->
+    check timestamp, Match.OneOf(undefined, Date, Match.Integer, Number)
     date = if timestamp? then new Date(timestamp) else new Date()
     idleSession(@connection, date, @userId)
     return
@@ -215,6 +216,7 @@ Meteor.methods
     # We only use timestamp because it's when we saw activity *on the client*
     # as opposed to just being notified it. It is probably more accurate even if
     # a dozen ms off due to the latency of sending it to the server.
+    check timestamp, Match.OneOf(undefined, Date, Match.Integer, Number)
     date = if timestamp? then new Date(timestamp) else new Date()
     activeSession(@connection, date, @userId)
     return
