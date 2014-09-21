@@ -29,6 +29,12 @@ Install using Meteor:
 $ meteor add mizzao:user-status
 ```
 
+Additionally, note that to read client IP addresses properly, you must set the
+`HTTP_FORWARDED_COUNT` environment variable for your app, and make sure that IP
+address headers are forwarded for any reverse proxy installed in front of the
+app. See the [Meteor docs on this](http://docs.meteor.com/#meteor_onconnection)
+for more details.
+
 ## Basic Usage - Online State
 
 This package maintains two types of status: a general user online flag in `Meteor.users`, and some additional data for each session. It uses [timesync](https://github.com/mizzao/meteor-timesync) to maintain the server's time across all clients, regardless of whether they have the correct time.
