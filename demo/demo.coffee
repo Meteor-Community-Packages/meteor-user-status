@@ -12,7 +12,8 @@ if Meteor.isClient
   Handlebars.registerHelper "localeTime", (date) -> date?.toLocaleString()
   Handlebars.registerHelper "relativeTime", relativeTime
 
-  Template.login.loggedIn = -> Meteor.userId()
+  Template.login.helpers
+    loggedIn: -> Meteor.userId()
 
   Template.status.events =
     "submit form.start-monitor": (e, tmpl) ->
@@ -25,30 +26,34 @@ if Meteor.isClient
     "click .stop-monitor": -> UserStatus.stopMonitor()
     "click .resync": -> TimeSync.resync()
 
-  Template.status.lastActivity = ->
-    lastActivity = @lastActivity()
-    if lastActivity?
-      return relativeTime lastActivity
-    else
-      return "undefined"
+  Template.status.helpers
+    lastActivity: ->
+      lastActivity = @lastActivity()
+      if lastActivity?
+        return relativeTime lastActivity
+      else
+        return "undefined"
 
-  Template.status.serverTime = -> new Date(TimeSync.serverTime()).toLocaleString()
-  Template.status.serverOffset = TimeSync.serverOffset
-  Template.status.serverRTT = TimeSync.roundTripTime
-  # Falsy values aren't rendered in templates, so let's render them ourself
-  Template.status.isIdleText = -> @isIdle() || "false"
-  Template.status.isMonitoringText = -> @isMonitoring() || "false"
+  Template.status.helpers
+    serverTime: -> new Date(TimeSync.serverTime()).toLocaleString()
+    serverOffset: TimeSync.serverOffset
+    serverRTT: TimeSync.roundTripTime
 
-  Template.serverStatus.anonymous = -> UserConnections.find(userId: $exists: false)
-  Template.serverStatus.users = -> Meteor.users.find()
-  Template.serverStatus.userClass = -> if @status?.idle then "warning" else "success"
+    # Falsy values aren't rendered in templates, so let's render them ourself
+    isIdleText: -> @isIdle() || "false"
+    isMonitoringText: -> @isMonitoring() || "false"
 
-  Template.serverStatus.connections = -> UserConnections.find(userId: @_id)
+  Template.serverStatus.helpers
+    anonymous: -> UserConnections.find(userId: $exists: false)
+    users: -> Meteor.users.find()
+    userClass: -> if @status?.idle then "warning" else "success"
+    connections = -> UserConnections.find(userId: @_id)
 
-  Template.serverConnection.connectionClass = -> if @idle then "warning" else "success"
-  Template.serverConnection.loginTime = ->
-    return unless @loginTime?
-    new Date(@loginTime).toLocaleString()
+  Template.serverConnection.helpers
+    connectionClass: -> if @idle then "warning" else "success"
+    loginTime: ->
+      return unless @loginTime?
+      new Date(@loginTime).toLocaleString()
 
   Template.login.events =
     "submit form": (e, tmpl) ->
