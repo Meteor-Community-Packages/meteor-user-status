@@ -6,7 +6,7 @@ Package.describe({
 });
 
 Package.onUse( function(api) {
-  api.versionsFrom("METEOR@0.9.0");
+  api.versionsFrom("0.9.4");
 
   api.use('accounts-base');
   api.use(['coffeescript', 'underscore']);

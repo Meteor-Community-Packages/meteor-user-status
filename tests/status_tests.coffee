@@ -13,7 +13,7 @@ TEST_UA = "old-ass browser"
 
 # Make sure repeated calls to this return different values
 delayedDate = ->
-  Meteor._wrapAsync((cb) -> Meteor.setTimeout (-> cb undefined, new Date()), 1)()
+  Meteor.wrapAsync((cb) -> Meteor.setTimeout (-> cb undefined, new Date()), 1)()
 
 randomConnection = ->
   id: Random.id()
