@@ -1,5 +1,8 @@
 ## vNEXT
 
+## v0.6.3
+
+* Update usage of the Mongo Collection API for Meteor 0.9.1+.
 * Add compatibility for the `audit-argument-checks` package.
 
 ## v0.6.2
