@@ -50,7 +50,7 @@ To make this available on the client, use a reactive cursor, such as by creating
 
 ```javascript
 Meteor.publish("userStatus", function() {
-  return Meteor.users.find({ "status.online": true }, fields: { ... });
+  return Meteor.users.find({ "status.online": true }, { fields: { ... } });
 });
 ```
 
