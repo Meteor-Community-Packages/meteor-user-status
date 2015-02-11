@@ -10,4 +10,4 @@ mizzao:accounts-testing
 mizzao:user-status
 mizzao:timesync
 mrt:moment
-mizzao:bootstrap-3
+twbs:bootstrap
