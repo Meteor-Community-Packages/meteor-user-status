@@ -47,7 +47,7 @@ if Meteor.isClient
     anonymous: -> UserConnections.find(userId: $exists: false)
     users: -> Meteor.users.find()
     userClass: -> if @status?.idle then "warning" else "success"
-    connections = -> UserConnections.find(userId: @_id)
+    connections: -> UserConnections.find(userId: @_id)
 
   Template.serverConnection.helpers
     connectionClass: -> if @idle then "warning" else "success"
