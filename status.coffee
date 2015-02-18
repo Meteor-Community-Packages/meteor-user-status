@@ -11,6 +11,13 @@ statusEvents = new (Npm.require('events').EventEmitter)()
 
 ###
   Multiplex login/logout events to status.online
+
+  'online' field is "true" if user is online, and "false" otherwise
+
+  'idle' field is tri-stated:
+  - "true" if user is online and not idle
+  - "false" if user is online and idle
+  - null if user is offline
 ###
 statusEvents.on "connectionLogin", (advice) ->
   update =
@@ -23,12 +30,14 @@ statusEvents.on "connectionLogin", (advice) ->
       }
     }
 
-  # State change if ALL existing connections were idle, but this one isn't
+  # unless ALL existing connections are idle (including this new one),
+  # the user connection becomes active.
   conns = UserConnections.find(userId: advice.userId).fetch()
   unless _.every(conns, (c) -> c.idle)
+    update.$set['status.idle'] = false
     update.$unset =
-      'status.idle': null
       'status.lastActivity': null
+  # in other case, idle field remains true and no update to lastActivity.
 
   Meteor.users.update advice.userId, update
   return
@@ -82,22 +91,25 @@ statusEvents.on "connectionIdle", (advice) ->
 
 statusEvents.on "connectionActive", (advice) ->
   Meteor.users.update advice.userId,
+    $set:
+      'status.idle': false
     $unset:
-      'status.idle': null
       'status.lastActivity': null
   return
 
-# Clear any online users on startup (they will re-add themselves)
-# Having no status.online is equivalent to status.online = false (above)
-# but it is unreasonable to set the entire users collection to false on startup.
-Meteor.startup ->
-  Meteor.users.update {}
-  , $unset: {
-    "status.online": null
-    "status.idle": null
-    "status.lastActivity": null
-  }
-  , {multi: true}
+# Reset online status on startup (users will reconnect)
+onStartup = (selector = {}) ->
+  Meteor.users.update selector,
+    {
+      $set: {
+        "status.online": false
+      },
+      $unset: {
+        "status.idle": null
+        "status.lastActivity": null
+      }
+    },
+    { multi: true }
 
 ###
   Local session modifification functions - also used in testing
@@ -178,6 +190,7 @@ activeSession = (connection, date, userId) ->
 ###
   Handlers for various client-side events
 ###
+Meteor.startup(onStartup)
 
 # Opening and closing of DDP connections
 Meteor.onConnection (connection) ->
@@ -230,6 +243,7 @@ UserStatus =
 
 # Internal functions, exported for testing
 StatusInternals = {
+  onStartup,
   addSession,
   removeSession,
   loginSession,

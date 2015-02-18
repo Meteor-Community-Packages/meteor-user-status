@@ -55,7 +55,7 @@ if Meteor.isClient
       unless Package['test-in-console']?
         test.equal user.status.lastLogin.userAgent, navigator.userAgent
 
-      test.isFalse user.status.idle?
+      test.equal user.status.idle, false
       test.isFalse user.status.lastActivity?
 
       next()
@@ -70,10 +70,11 @@ if Meteor.isClient
       test.isTrue doc.ipAddr?
       test.isTrue Math.abs(doc.loginTime - loginTime) < timeTol
 
+      # This shit doesn't seem to work properly in PhantomJS on Travis
       unless Package['test-in-console']?
         test.equal doc.userAgent, navigator.userAgent
 
-      test.isFalse doc.idle?
+      test.isFalse doc.idle? # connection record, not user
       test.isFalse doc.lastActivity?
 
       next()
@@ -119,7 +120,7 @@ if Meteor.isClient
         test.equal user.status.online, true
         test.isTrue user.status.lastLogin?
 
-        test.isFalse user.status.idle?
+        test.equal user.status.idle, false
         test.isFalse user.status.lastActivity?
 
         next()
@@ -159,7 +160,7 @@ if Meteor.isClient
         test.equal user.status.online, true
         test.isTrue user.status.lastLogin?
 
-        test.isFalse user.status.idle?
+        test.equal user.status.idle, false
         test.isFalse user.status.lastActivity?
 
         next()

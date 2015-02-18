@@ -89,6 +89,7 @@ Tinytest.add "status - adding one authenticated session", withCleanup (test) ->
   test.equal lastLoginAdvice.userAgent, TEST_UA
 
   test.equal user.status.online, true
+  test.equal user.status.idle, false
   test.equal user.status.lastLogin.date, ts
   test.equal user.status.lastLogin.userAgent, TEST_UA
 
@@ -113,6 +114,7 @@ Tinytest.add "status - adding and removing one authenticated session", withClean
   test.isFalse lastLogoutAdvice.lastActivity?
 
   test.equal user.status.online, false
+  test.isFalse user.status.idle?
   test.equal user.status.lastLogin.date, ts
 
 Tinytest.add "status - logout and then close one authenticated session", withCleanup (test) ->
@@ -143,6 +145,7 @@ Tinytest.add "status - logout and then close one authenticated session", withCle
   test.isFalse lastLogoutAdvice?
 
   test.equal user.status.online, false
+  test.isFalse user.status.idle?
   test.equal user.status.lastLogin.date, ts
 
 Tinytest.add "status - idling one authenticated session", withCleanup (test) ->
@@ -207,7 +210,7 @@ Tinytest.add "status - idling and reactivating one authenticated session", withC
 
   test.equal user.status.online, true
   test.equal user.status.lastLogin.date, ts
-  test.isFalse user.status.idle?,
+  test.equal user.status.idle, false
   test.isFalse user.status.lastActivity?
 
 Tinytest.add "status - idling and removing one authenticated session", withCleanup (test) ->
@@ -355,7 +358,7 @@ Tinytest.add "multiplex - idling one of two online sessions", withCleanup (test)
 
   test.equal user.status.online, true
   test.equal user.status.lastLogin.date, ts2
-  test.isFalse user.status.idle?
+  test.equal user.status.idle, false
 
 Tinytest.add "multiplex - idling two online sessions", withCleanup (test) ->
   conn = randomConnection()
@@ -408,7 +411,7 @@ Tinytest.add "multiplex - idling two then reactivating one session", withCleanup
 
   test.equal user.status.online, true
   test.equal user.status.lastLogin.date, ts2
-  test.isFalse user.status.idle?
+  test.equal user.status.idle, false
   test.isFalse user.status.lastActivity?
 
 Tinytest.add "multiplex - logging in while an existing session is idle", withCleanup (test) ->
@@ -432,7 +435,7 @@ Tinytest.add "multiplex - logging in while an existing session is idle", withCle
 
   test.equal user.status.online, true
   test.equal user.status.lastLogin.date, ts2
-  test.isFalse user.status.idle?
+  test.equal user.status.idle, false
   test.isFalse user.status.lastActivity?
 
 Tinytest.add "multiplex - simulate tab switch", withCleanup (test) ->
@@ -463,7 +466,7 @@ Tinytest.add "multiplex - simulate tab switch", withCleanup (test) ->
 
   test.equal user.status.online, true
   test.equal user.status.lastLogin.date, ts2
-  test.isFalse user.status.idle?
+  test.equal user.status.idle, false
   test.isFalse user.status.lastActivity?
 
 # Test for idling one session across a disconnection; not most recent idle time
@@ -511,7 +514,32 @@ Tinytest.add "multiplex - disconnection and reconnection while idle", withCleanu
   test.equal user.status.idle, true
   test.equal user.status.lastActivity, idle2
 
+Tinytest.add "status - user online set to false on startup", withCleanup (test) ->
+  # special argument to onStartup prevents this from affecting client tests
+  StatusInternals.onStartup(TEST_userId)
 
+  userAfterStartup = Meteor.users.findOne(TEST_userId)
+  # Check reset status
+  test.equal userAfterStartup.status.online, false
+  test.equal userAfterStartup.status.idle, undefined
+  test.equal userAfterStartup.status.lastActivity, undefined
 
+  # Make user come online, then restart the server
+  conn = randomConnection()
+  ts = delayedDate()
 
+  StatusInternals.addSession(conn)
+  StatusInternals.loginSession(conn, ts, TEST_userId)
 
+  userAfterLogin = Meteor.users.findOne(TEST_userId)
+
+  test.equal userAfterLogin.status.online, true
+  test.isFalse userAfterLogin.status.idle
+
+  StatusInternals.onStartup(TEST_userId)
+
+  userAfterRestart = Meteor.users.findOne(TEST_userId)
+  # Check reset status again
+  test.equal userAfterRestart.status.online, false
+  test.equal userAfterRestart.status.idle, undefined
+  test.equal userAfterRestart.status.lastActivity, undefined

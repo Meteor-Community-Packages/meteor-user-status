@@ -1,5 +1,9 @@
 ## vNEXT
 
+## v0.6.4
+
+* Improve consistency of the `status.online` and `status.idle` fields. (#31)
+
 ## v0.6.3
 
 * Update usage of the Mongo Collection API for Meteor 0.9.1+.
