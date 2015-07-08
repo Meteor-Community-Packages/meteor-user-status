@@ -1,5 +1,9 @@
 ## vNEXT
 
+## v0.6.5
+
+* Detect pause/resume events in Cordova. (#47, #64) 
+
 ## v0.6.4
 
 * Improve consistency of the `status.online` and `status.idle` fields. (#31)

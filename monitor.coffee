@@ -48,14 +48,6 @@ MonitorInternals = {
     # triggered at some point in the past!
     monitor(true)
 
-  onCordovaPause: ->
-    focused = false
-    monitor()
-
-  onCordovaResume: ->
-    focused = true
-    monitor(true)
-
   reportIdle: (time) ->
     Meteor.call "user-status-idle", time
 
@@ -159,10 +151,11 @@ Meteor.startup ->
   $(window).blur MonitorInternals.onWindowBlur
   $(window).focus MonitorInternals.onWindowFocus
 
-  # Catch Cordova "pause" and "resume" events
+  # Catch Cordova "pause" and "resume" events:
+  # https://github.com/mizzao/meteor-user-status/issues/47
   if Meteor.isCordova
-    document.addEventListener "pause", MonitorInternals.onCordovaPause
-    document.addEventListener "resume", MonitorInternals.onCordovaResume
+    document.addEventListener "pause", MonitorInternals.onWindowBlur
+    document.addEventListener "resume", MonitorInternals.onWindowFocus
 
   # First check initial state if window loaded while blurred
   # Some browsers don't fire focus on load: http://stackoverflow.com/a/10325169/586086
