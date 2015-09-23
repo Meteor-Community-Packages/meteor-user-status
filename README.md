@@ -44,7 +44,7 @@ This package maintains two types of status: a general user online flag in `Meteo
 - `online`: `true` if there is at least one connection online for this user
 - `lastLogin`: information about the most recent login of the user, with the fields `date`, `ipAddr`, and `userAgent`.
 - `idle`: `true` if all connections for this user are idle. Requires idle tracking to be turned on for all connections, as below.
-- `lastActivity`: if the user was idle, the last time an action was observed. Field is only available when user is online. When user Logs off, the field will disappear. To track lastActivity for every user (regardless of monitoring) use Server API.
+- `lastActivity`: if the user was idle, the last time an action was observed. This field is only available when the user is online and idle. It does not maintain the user's last activity in real time or a stored value indefinitely - `lastLogin` is a coarse approximation to that. For more information, see https://github.com/mizzao/meteor-user-status/issues/80.
 
 To make this available on the client, use a reactive cursor, such as by creating a publication on the server:
 
