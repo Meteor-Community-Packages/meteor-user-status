@@ -1,5 +1,9 @@
 ## vNEXT
 
+## v0.6.6
+
+* Declare dependent packages explicitly for Meteor 1.2.
+
 ## v0.6.5
 
 * Detect pause/resume events in Cordova. (#47, #64) 
