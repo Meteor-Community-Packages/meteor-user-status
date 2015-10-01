@@ -4,10 +4,10 @@
 # but you can also edit it by hand.
 
 standard-app-packages
-insecure
 coffeescript
 mizzao:accounts-testing
 mizzao:user-status
 mizzao:timesync
 mrt:moment
 twbs:bootstrap
+standard-minifiers
