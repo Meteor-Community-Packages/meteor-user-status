@@ -1,0 +1,8 @@
+{
+  "galaxy.meteor.com": {
+    "env": {
+      "ROOT_URL":  "https://user-status.meteorapp.com",
+      "MONGO_URL": "mongodb://xxxxx:xxxxxx@xxxxx.mlab.com:37283/xxxxx"
+    }
+  }
+}

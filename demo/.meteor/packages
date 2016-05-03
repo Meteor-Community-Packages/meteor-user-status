@@ -10,4 +10,5 @@ mizzao:user-status
 mizzao:timesync
 mrt:moment
 twbs:bootstrap
-standard-minifiers
+standard-minifier-css
+standard-minifier-js
