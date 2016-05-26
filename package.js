@@ -13,7 +13,7 @@ Package.onUse( function(api) {
   api.use(['coffeescript', 'underscore']);
   api.use('mongo');
 
-  api.use(['deps', 'jquery'], 'client');
+  api.use('deps', 'client');
 
   api.use('mizzao:timesync@0.3.4');
 
