@@ -111,7 +111,7 @@ For an example of how the above functions are used, see the demo.
 
 ### Server API
 
-The `UserStatus.connections` (in-memory) collection contains information for all connections on the server, in the following fields:
+The `UserConnections` (in-memory) collection contains information for all connections on the server, in the following fields:
 
 - `_id`: the connection id.
 - `userId`: the user id, if the connection is authenticated.
