@@ -143,13 +143,12 @@ lastActivity = ->
 Meteor.startup ->
   # Listen for mouse and keyboard events on window
   # TODO other stuff - e.g. touch events?
-  $(window).on "click keydown", -> monitor(true)
+  window.addEventListener "click", -> monitor(true)
+  window.addEventListener "keydown", -> monitor(true)
 
   # catch window blur events when requested and where supported
-  # We'll use jQuery here instead of window.blur so that other code can attach blur events:
-  # http://stackoverflow.com/q/22415296/586086
-  $(window).blur MonitorInternals.onWindowBlur
-  $(window).focus MonitorInternals.onWindowFocus
+  window.addEventListener "blur", MonitorInternals.onWindowBlur
+  window.addEventListener "focus", MonitorInternals.onWindowFocus
 
   # Catch Cordova "pause" and "resume" events:
   # https://github.com/mizzao/meteor-user-status/issues/47
