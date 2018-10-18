@@ -1,5 +1,9 @@
 ## vNEXT
 
+## v0.6.8
+
+* Updated Coffeescript dependency to allow both v1 and v2.
+
 ## v0.6.7
 
 * Remove jQuery dependency
