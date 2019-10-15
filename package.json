@@ -11,8 +11,7 @@
   "homepage": "https://github.com/Meteor-Community-Packages/meteor-user-status#readme",
   "private": false,
   "scripts": {
-    "lint": "./node_modules/.bin/eslint .",
-    "test": "npm run lint"
+    "lint": "./node_modules/.bin/eslint ."
   },
   "devDependencies": {
     "autoprefixer": "^9.6.1",
@@ -23,7 +22,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run test"
+      "pre-commit": "npm run lint"
     }
   }
 }
