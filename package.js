@@ -16,7 +16,7 @@ Package.onUse((api) => {
   api.use('underscore');
   api.use('mongo');
   api.use('tracker', 'client');
-  api.use('mizzao:timesync@0.3.4');
+  api.use('mizzao:timesync@0.5.1');
 
   api.export('MonitorInternals', 'client', {
     testOnly: true
@@ -33,7 +33,7 @@ Package.onUse((api) => {
 Package.onTest((api) => {
   api.use('ecmascript');
   api.use('mizzao:user-status');
-  api.use('mizzao:timesync');
+  api.use('mizzao:timesync@0.5.1');
 
   api.use(['accounts-base', 'accounts-password']);
   api.use('underscore');
