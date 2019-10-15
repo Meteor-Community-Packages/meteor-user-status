@@ -2,8 +2,16 @@
 
 ## v0.7.0
 
-* Decaffeinated
-* Eslint and jsbeautify
+* Decaffeinated!
+* Added ESLint and jsbeautify
+* Added husky for pre-commit lint checking
+* Don't try to stop monitor in testing if it's not started
+* Upgrade demo to Meteor 1.8.1
+* Upgraded timesync to 0.5.1
+* Formatted all JS, CSS, and HTML files to jsbeautify specs
+* Updated all references of github.com/mizzao to github.com/Meteor-Community-Packages
+* Changed TravisCI to use Node 10.16.0 and added lint checks
+* Added Visual Studio Code settings.json
 
 ## v0.6.8
 
