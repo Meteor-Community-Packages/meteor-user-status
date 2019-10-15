@@ -1,0 +1,11 @@
+{
+	"powermode.enabled": true,
+	"editor.formatOnSave": true,
+	"cSpell.enabled": true,
+	"jshint.options": {
+		"esversion": 6
+	},
+	"git.confirmSync": false,
+	"html.format.wrapLineLength": 0,
+	"files.eol": "\n"
+}

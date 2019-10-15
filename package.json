@@ -1,0 +1,23 @@
+{
+	"name": "meteor-user-status",
+	"repository": {
+		"url": "https://github.com/Meteor-Community-Packages/meteor-user-status"
+	},
+	"private": false,
+	"scripts": {
+		"lint": "./node_modules/.bin/eslint .",
+		"test": "npm run test"
+	},
+	"devDependencies": {
+		"autoprefixer": "^9.6.1",
+		"babel-eslint": "^10.0.3",
+		"eslint": "^5.16.0",
+		"husky": "^3.0.5",
+		"mocha": "^6.2.0"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "npm run lint && npm run test"
+		}
+	}
+}
