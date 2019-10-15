@@ -2,7 +2,7 @@
 import { Meteor } from 'meteor/meteor';
 import { TimeSync } from 'meteor/mizzao:timesync';
 import { Tracker } from 'meteor/tracker';
-import { MonitorInternals, UserStatus } from '../status';
+import { MonitorInternals, UserStatus } from '../client/monitor';
 import { getCleanupWrapper } from './setup';
 
 const tolMs = 100;

@@ -1,4 +1,4 @@
-user-status [![Build Status](https://travis-ci.org/mizzao/meteor-user-status.png?branch=master)](https://travis-ci.org/mizzao/meteor-user-status)
+user-status [![Build Status](https://travis-ci.org/Meteor-Community-Packages/meteor-user-status.png?branch=master)](https://travis-ci.org/Meteor-Community-Packages/meteor-user-status)
 ===========
 
 ## What's this do?
@@ -9,17 +9,12 @@ some other objects. This allows you to easily see users that are online, for
 applications such as rendering the users box below showing online users in green
 and idle users in orange.
 
-![User online states](https://raw.github.com/mizzao/meteor-user-status/master/docs/example.png)
+![User online states](https://raw.github.com/Meteor-Community-Packages/meteor-user-status/master/docs/example.png)
 
 For a complete example of what can be tracked, including inactivity, IP
 addresses, and user agents, check out a demo app at
 http://user-status.meteor.com, or its
-[source](https://github.com/mizzao/meteor-user-status/tree/master/demo).
-
-Help keep your favorite Meteor packages alive! If you depend on this package in
-your app and find it useful, consider a donation at
-[Gittip](https://www.gittip.com/mizzao/) for me (or other Meteor package
-maintainers).
+[source](https://github.com/Meteor-Community-Packages/meteor-user-status/tree/master/demo).
 
 ## Install
 
@@ -37,14 +32,14 @@ for more details.
 
 ## Basic Usage - Online State
 
-This package maintains two types of status: a general user online flag in `Meteor.users`, and some additional data for each session. It uses [timesync](https://github.com/mizzao/meteor-timesync) to maintain the server's time across all clients, regardless of whether they have the correct time.
+This package maintains two types of status: a general user online flag in `Meteor.users`, and some additional data for each session. It uses [timesync](https://github.com/Meteor-Community-Packages/meteor-timesync) to maintain the server's time across all clients, regardless of whether they have the correct time.
 
 `Meteor.users` receives a `status` field will be updated automatically if the user logs in or logs out, closes their browser, or otherwise disconnects. A user is online if at least one connection with that `userId` is logged in. It contains the following fields:
 
 - `online`: `true` if there is at least one connection online for this user
 - `lastLogin`: information about the most recent login of the user, with the fields `date`, `ipAddr`, and `userAgent`.
 - `idle`: `true` if all connections for this user are idle. Requires idle tracking to be turned on for all connections, as below.
-- `lastActivity`: if the user was idle, the last time an action was observed. This field is only available when the user is online and idle. It does not maintain the user's last activity in real time or a stored value indefinitely - `lastLogin` is a coarse approximation to that. For more information, see https://github.com/mizzao/meteor-user-status/issues/80.
+- `lastActivity`: if the user was idle, the last time an action was observed. This field is only available when the user is online and idle. It does not maintain the user's last activity in real time or a stored value indefinitely - `lastLogin` is a coarse approximation to that. For more information, see https://github.com/Meteor-Community-Packages/meteor-user-status/issues/80.
 
 To make this available on the client, use a reactive cursor, such as by creating a publication on the server:
 
@@ -105,7 +100,7 @@ On the client, the `UserStatus` object provides for seamless automatic monitorin
 - `pingMonitor`: if the automatic event handlers aren't catching what you need, you can manually ping the monitor to signal that a user is doing something and reset the idle monitor.
 - `isIdle`: a reactive variable signifying whether the user is currently idle or not.
 - `isMonitoring`: a reactive variable for whether the monitor is running.
-- `lastActivity`: a reactive variable for the last action recorded by the user (according to [server time](https://github.com/mizzao/meteor-timesync)). Since this variable will be invalidated a lot and cause many recomputations, it's best only used for debugging or diagnostics (as in the demo).
+- `lastActivity`: a reactive variable for the last action recorded by the user (according to [server time](https://github.com/Meteor-Community-Packages/meteor-timesync)). Since this variable will be invalidated a lot and cause many recomputations, it's best only used for debugging or diagnostics (as in the demo).
 
 For an example of how the above functions are used, see the demo.
 

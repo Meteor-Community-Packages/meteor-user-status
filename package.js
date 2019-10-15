@@ -25,8 +25,8 @@ Package.onUse((api) => {
     testOnly: true
   });
 
-  api.mainModule('monitor.js', 'client');
-  api.mainModule('status.js', 'server');
+  api.mainModule('client/monitor.js', 'client');
+  api.mainModule('server/status.js', 'server');
 
 });
 
@@ -49,5 +49,6 @@ Package.onTest((api) => {
   api.addFiles('tests/monitor_tests.js', 'client');
   api.addFiles('tests/status_tests.js', 'server');
 
-  api.addFiles('tests/server_client_tests.js');
+  api.addFiles('tests/server_tests.js', 'server');
+  api.addFiles('tests/client_tests.js', 'client');
 });

@@ -1,12 +1,10 @@
 import { Accounts } from 'meteor/accounts-base';
 import { Meteor } from 'meteor/meteor';
-import { _ } from 'underscore';
 
 /*
  * Created by https://github.com/matb33 for testing packages that make user of userIds
  * Original file https://github.com/matb33/meteor-collection-hooks/blob/master/tests/insecure_login.js
  */
-
 export const InsecureLogin = {
   queue: [],
   ran: false,
@@ -19,7 +17,7 @@ export const InsecureLogin = {
     InsecureLogin.unwind();
   },
   unwind: () => {
-    _.each(InsecureLogin.queue, (callback) => {
+    InsecureLogin.queue.forEach((callback) => {
       callback();
     });
     InsecureLogin.queue = [];

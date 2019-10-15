@@ -9,14 +9,14 @@ import { Accounts } from 'meteor/accounts-base';
 import { check, Match } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
-import { _ } from 'underscore';
+import { _ } from 'meteor/underscore';
+import { EventEmitter } from 'events';
 
 const UserConnections = new Mongo.Collection('user_status_sessions', {
   connection: null
 });
 
-// eslint-disable-next-line no-undef
-const statusEvents = new(Npm.require('events').EventEmitter)();
+const statusEvents = new(EventEmitter)();
 
 /*
   Multiplex login/logout events to status.online
@@ -261,7 +261,7 @@ Accounts.onLogin(info => loginSession(info.connection, new Date(), info.user._id
 
 // pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
 // We used this in the past, but still need this to detect logouts on the same connection.
-Meteor.publish(null, () => {
+Meteor.publish(null, function () {
   // Return null explicitly if this._session is not available, i.e.:
   // https://github.com/arunoda/meteor-fast-render/issues/41
   if (this._session == null) {

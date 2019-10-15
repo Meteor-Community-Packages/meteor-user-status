@@ -2,7 +2,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { Tracker } from 'meteor/tracker';
-import { StatusInternals, UserStatus } from '../status';
+import { StatusInternals, UserStatus } from '../server/status';
 import { getCleanupWrapper, TEST_IP, TEST_userId } from './setup';
 
 let lastLoginAdvice = null;
@@ -58,7 +58,7 @@ const withCleanup = getCleanupWrapper({
 });
 
 // Clean up before we add any tests just in case some crap left over from before
-withCleanup(() => {});
+withCleanup(function () {});
 
 Tinytest.add('status - adding anonymous session', withCleanup((test) => {
   const conn = randomConnection();

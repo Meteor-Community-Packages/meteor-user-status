@@ -2,7 +2,7 @@
 import { Meteor } from 'meteor/meteor';
 
 export const TEST_username = 'status_test';
-export let TEST_userId = undefined;
+export let TEST_userId = '';
 export const TEST_IP = '255.255.255.0';
 
 if (Meteor.isServer) {
@@ -14,6 +14,9 @@ if (Meteor.isServer) {
     TEST_userId = Meteor.users.insert({
       username: TEST_username
     });
+    console.log('Inserted test user id: ', TEST_userId);
+  } else {
+    TEST_userId = testUserExists._id;
   }
 }
 
@@ -23,7 +26,7 @@ export const getCleanupWrapper = function (settings) {
   const { after } = settings;
   // Take a function...
   return fn => // Return a function that, when called, executes the hooks around the function.
-    (() => {
+    (function () {
       const next = arguments[1];
       if (typeof before === 'function') {
         before();
@@ -42,7 +45,7 @@ export const getCleanupWrapper = function (settings) {
         }
       } else {
         // Asynchronous version - Tinytest.addAsync
-        const hookedNext = () => {
+        const hookedNext = function () {
           if (typeof after === 'function') {
             after();
           }

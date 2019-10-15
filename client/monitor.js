@@ -24,7 +24,7 @@ const activityDep = new Tracker.Dependency;
 let focused = true;
 
 // These settings are internal or exported for test only
-var MonitorInternals = {
+export let MonitorInternals = {
   idleThreshold: null,
   idleOnBlur: false,
 
