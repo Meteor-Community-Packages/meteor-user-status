@@ -12,7 +12,8 @@
   "private": false,
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
-    "test": "meteor test-packages --once --driver-package test-in-console"
+    "test": "make test",
+    "test-local": "meteor test-packages --once --driver-package test-in-console"
   },
   "devDependencies": {
     "autoprefixer": "^9.6.1",
@@ -25,5 +26,8 @@
     "hooks": {
       "pre-commit": "npm run lint"
     }
+  },
+  "dependencies": {
+    "bcrypt": "^3.0.6"
   }
 }
