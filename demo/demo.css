@@ -1,4 +1,4 @@
-tr.bold > td {
-    font-weight: bold;
-    text-decoration: underline;
+tr.bold>td {
+  font-weight: bold;
+  text-decoration: underline;
 }

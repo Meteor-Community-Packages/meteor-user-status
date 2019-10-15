@@ -3,6 +3,7 @@
 ## v0.7.0
 
 * Decaffeinated
+* Eslint and jsbeautify
 
 ## v0.6.8
 
