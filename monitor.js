@@ -119,7 +119,7 @@ const stop = () => {
   if (idle) { // Un-set any idleness
     idle = false;
     idleDep.changed();
-    // need to run this because the Deps below won't re-run when monitor is off
+    // need to run this because the Tracker below won't re-run when monitor is off
     MonitorInternals.reportActive(Tracker.nonreactive(() => TimeSync.serverTime()));
   }
 

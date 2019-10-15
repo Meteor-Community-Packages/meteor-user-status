@@ -10,19 +10,13 @@ Package.describe({
 Package.onUse((api) => {
   api.versionsFrom('1.2.0.1');
 
+  api.use('ecmascript');
   api.use('accounts-base');
   api.use('check');
   api.use('underscore');
   api.use('mongo');
-
-  api.use('deps', 'client');
-
+  api.use('tracker', 'client');
   api.use('mizzao:timesync@0.3.4');
-
-  api.addFiles('monitor.coffee', 'client');
-  api.addFiles('status.coffee', 'server');
-
-  api.export('UserStatus'); // on both
 
   api.export('MonitorInternals', 'client', {
     testOnly: true
@@ -30,14 +24,19 @@ Package.onUse((api) => {
   api.export('StatusInternals', 'server', {
     testOnly: true
   });
+
+  api.mainModule('monitor.js', 'client');
+  api.mainModule('status.js', 'server');
+
 });
 
 Package.onTest((api) => {
+  api.use('ecmascript');
   api.use('mizzao:user-status');
   api.use('mizzao:timesync');
 
   api.use(['accounts-base', 'accounts-password']);
-  api.use(['underscore']);
+  api.use('underscore');
 
   api.use(['random', 'tracker']);
 
