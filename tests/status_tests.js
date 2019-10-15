@@ -1,10 +1,9 @@
+/* globals Tinytest */
 import { Meteor } from 'meteor/meteor';
-import { Tinytest } from 'meteor/tiny-test';
-import { UserStatus, StatusInternals } from '../status';
 import { Random } from 'meteor/random';
 import { Tracker } from 'meteor/tracker';
-
-import { TEST_IP, TEST_userId, getCleanupWrapper } from './setup';
+import { StatusInternals, UserStatus } from '../status';
+import { getCleanupWrapper, TEST_IP, TEST_userId } from './setup';
 
 let lastLoginAdvice = null;
 let lastLogoutAdvice = null;

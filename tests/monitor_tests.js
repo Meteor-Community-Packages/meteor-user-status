@@ -1,6 +1,6 @@
+/* globals Tinytest */
 import { Meteor } from 'meteor/meteor';
 import { TimeSync } from 'meteor/mizzao:timesync';
-import { Tinytest } from 'meteor/tiny-test';
 import { Tracker } from 'meteor/tracker';
 import { MonitorInternals, UserStatus } from '../status';
 import { getCleanupWrapper } from './setup';

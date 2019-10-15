@@ -1,8 +1,7 @@
-/* globals navigator, Package */
+/* globals navigator, Package, Tinytest */
 
 import { Meteor } from 'meteor/meteor';
 import { TimeSync } from 'meteor/mizzao:timesync';
-import { Tinytest } from 'meteor/tiny-test';
 import { UserStatus } from '../status';
 import { InsecureLogin } from './insecure_login';
 import { TEST_IP, TEST_userId } from './setup';

@@ -11,18 +11,18 @@ export const InsecureLogin = {
   queue: [],
   ran: false,
   ready: (callback) => {
-    this.queue.push(callback);
-    if (this.ran) this.unwind();
+    InsecureLogin.queue.push(callback);
+    if (InsecureLogin.ran) InsecureLogin.unwind();
   },
   run: () => {
-    this.ran = true;
-    this.unwind();
+    InsecureLogin.ran = true;
+    InsecureLogin.unwind();
   },
   unwind: () => {
-    _.each(this.queue, (callback) => {
+    _.each(InsecureLogin.queue, (callback) => {
       callback();
     });
-    this.queue = [];
+    InsecureLogin.queue = [];
   }
 };
 
