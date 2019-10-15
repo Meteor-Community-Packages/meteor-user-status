@@ -28,7 +28,7 @@ const statusEvents = new(Npm.require('events').EventEmitter)();
   - "false" if user is online and idle
   - null if user is offline
 */
-statusEvents.on('connectionLogin', function (advice) {
+statusEvents.on('connectionLogin', (advice) => {
   const update = {
     $set: {
       'status.online': true,
@@ -56,7 +56,7 @@ statusEvents.on('connectionLogin', function (advice) {
   Meteor.users.update(advice.userId, update);
 });
 
-statusEvents.on('connectionLogout', function (advice) {
+statusEvents.on('connectionLogout', (advice) => {
   const conns = UserConnections.find({
     userId: advice.userId
   }).fetch();
@@ -101,7 +101,7 @@ statusEvents.on('connectionLogout', function (advice) {
   TODO: There is a race condition when switching between tabs, leaving the user inactive while idle goes from one tab to the other.
   It can probably be smoothed out.
 */
-statusEvents.on('connectionIdle', function (advice) {
+statusEvents.on('connectionIdle', (advice) => {
   const conns = UserConnections.find({
     userId: advice.userId
   }).fetch();
@@ -120,7 +120,7 @@ statusEvents.on('connectionIdle', function (advice) {
   });
 });
 
-statusEvents.on('connectionActive', function (advice) {
+statusEvents.on('connectionActive', (advice) => {
   Meteor.users.update(advice.userId, {
     $set: {
       'status.idle': false
@@ -132,7 +132,7 @@ statusEvents.on('connectionActive', function (advice) {
 });
 
 // Reset online status on startup (users will reconnect)
-const onStartup = function (selector) {
+const onStartup = (selector) => {
   if (selector == null) {
     selector = {};
   }
@@ -153,7 +153,7 @@ const onStartup = function (selector) {
   Local session modification functions - also used in testing
 */
 
-const addSession = function (connection) {
+const addSession = (connection) => {
   UserConnections.upsert(connection.id, {
     $set: {
       ipAddr: connection.clientAddress,
@@ -162,7 +162,7 @@ const addSession = function (connection) {
   });
 };
 
-const loginSession = function (connection, date, userId) {
+const loginSession = (connection, date, userId) => {
   UserConnections.upsert(connection.id, {
     $set: {
       userId,
@@ -180,7 +180,7 @@ const loginSession = function (connection, date, userId) {
 };
 
 // Possibly trigger a logout event if this connection was previously associated with a user ID
-const tryLogoutSession = function (connection, date) {
+const tryLogoutSession = (connection, date) => {
   let conn;
   if ((conn = UserConnections.findOne({
       _id: connection.id,
@@ -207,12 +207,12 @@ const tryLogoutSession = function (connection, date) {
   });
 };
 
-const removeSession = function (connection, date) {
+const removeSession = (connection, date) => {
   tryLogoutSession(connection, date);
   UserConnections.remove(connection.id);
 };
 
-const idleSession = function (connection, date, userId) {
+const idleSession = (connection, date, userId) => {
   UserConnections.update(connection.id, {
     $set: {
       idle: true,
@@ -227,7 +227,7 @@ const idleSession = function (connection, date, userId) {
   });
 };
 
-const activeSession = function (connection, date, userId) {
+const activeSession = (connection, date, userId) => {
   UserConnections.update(connection.id, {
     $set: {
       idle: false
@@ -250,7 +250,7 @@ const activeSession = function (connection, date, userId) {
 Meteor.startup(onStartup);
 
 // Opening and closing of DDP connections
-Meteor.onConnection(function (connection) {
+Meteor.onConnection((connection) => {
   addSession(connection);
 
   return connection.onClose(() => removeSession(connection, new Date()));
@@ -261,7 +261,7 @@ Accounts.onLogin(info => loginSession(info.connection, new Date(), info.user._id
 
 // pub/sub trick as referenced in http://stackoverflow.com/q/10257958/586086
 // We used this in the past, but still need this to detect logouts on the same connection.
-Meteor.publish(null, function () {
+Meteor.publish(null, () => {
   // Return null explicitly if this._session is not available, i.e.:
   // https://github.com/arunoda/meteor-fast-render/issues/41
   if (this._session == null) {

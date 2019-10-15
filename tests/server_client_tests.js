@@ -66,14 +66,14 @@ if (Meteor.isClient) {
   let idleTime = null;
 
   // Monitor tests will wait for timesync, so we don't need to here.
-  Tinytest.addAsync('status - login', (test, next) => InsecureLogin.ready(function () {
+  Tinytest.addAsync('status - login', (test, next) => InsecureLogin.ready(() => {
     test.ok();
     loginTime = new Date(TimeSync.serverTime());
     return next();
   }));
 
   // Check that initialization is empty
-  Tinytest.addAsync('status - online recorded on server', (test, next) => Meteor.call('grabStatus', function (err, res) {
+  Tinytest.addAsync('status - online recorded on server', (test, next) => Meteor.call('grabStatus', (err, res) => {
     test.isUndefined(err);
     test.length(res, 1);
 
@@ -94,7 +94,7 @@ if (Meteor.isClient) {
     return next();
   }));
 
-  Tinytest.addAsync('status - session recorded on server', (test, next) => Meteor.call('grabSessions', function (err, res) {
+  Tinytest.addAsync('status - session recorded on server', (test, next) => Meteor.call('grabSessions', (err, res) => {
     test.isUndefined(err);
     test.length(res, 1);
 
@@ -114,20 +114,20 @@ if (Meteor.isClient) {
     return next();
   }));
 
-  Tinytest.addAsync('status - online recorded on client', function (test, next) {
+  Tinytest.addAsync('status - online recorded on client', (test, next) => {
     test.equal(Meteor.user().status.online, true);
     return next();
   });
 
-  Tinytest.addAsync('status - idle report to server', function (test, next) {
+  Tinytest.addAsync('status - idle report to server', (test, next) => {
     const now = TimeSync.serverTime();
     idleTime = new Date(now);
 
-    return Meteor.call('user-status-idle', now, function (err) {
+    return Meteor.call('user-status-idle', now, (err) => {
       test.isUndefined(err);
 
       // Testing grabStatus should be sufficient to ensure that sessions work
-      return Meteor.call('grabStatus', function (err, res) {
+      return Meteor.call('grabStatus', (err, res) => {
         test.isUndefined(err);
         test.length(res, 1);
 
@@ -144,13 +144,13 @@ if (Meteor.isClient) {
     });
   });
 
-  Tinytest.addAsync('status - active report to server', function (test, next) {
+  Tinytest.addAsync('status - active report to server', (test, next) => {
     const now = TimeSync.serverTime();
 
-    return Meteor.call('user-status-active', now, function (err) {
+    return Meteor.call('user-status-active', now, (err) => {
       test.isUndefined(err);
 
-      return Meteor.call('grabStatus', function (err, res) {
+      return Meteor.call('grabStatus', (err, res) => {
         test.isUndefined(err);
         test.length(res, 1);
 
@@ -167,14 +167,14 @@ if (Meteor.isClient) {
     });
   });
 
-  Tinytest.addAsync('status - idle report with no timestamp', function (test, next) {
+  Tinytest.addAsync('status - idle report with no timestamp', (test, next) => {
     const now = TimeSync.serverTime();
     idleTime = new Date(now);
 
-    return Meteor.call('user-status-idle', undefined, function (err) {
+    return Meteor.call('user-status-idle', undefined, (err) => {
       test.isUndefined(err);
 
-      return Meteor.call('grabStatus', function (err, res) {
+      return Meteor.call('grabStatus', (err, res) => {
         test.isUndefined(err);
         test.length(res, 1);
 
@@ -191,10 +191,10 @@ if (Meteor.isClient) {
     });
   });
 
-  Tinytest.addAsync('status - active report with no timestamp', (test, next) => Meteor.call('user-status-active', undefined, function (err) {
+  Tinytest.addAsync('status - active report with no timestamp', (test, next) => Meteor.call('user-status-active', undefined, (err) => {
     test.isUndefined(err);
 
-    return Meteor.call('grabStatus', function (err, res) {
+    return Meteor.call('grabStatus', (err, res) => {
       test.isUndefined(err);
       test.length(res, 1);
 
@@ -210,12 +210,12 @@ if (Meteor.isClient) {
     });
   }));
 
-  Tinytest.addAsync('status - logout', (test, next) => Meteor.logout(function (err) {
+  Tinytest.addAsync('status - logout', (test, next) => Meteor.logout((err) => {
     test.isUndefined(err);
     return next();
   }));
 
-  Tinytest.addAsync('status - offline recorded on server', (test, next) => Meteor.call('grabStatus', function (err, res) {
+  Tinytest.addAsync('status - offline recorded on server', (test, next) => Meteor.call('grabStatus', (err, res) => {
     test.isUndefined(err);
     test.length(res, 1);
 
@@ -231,7 +231,7 @@ if (Meteor.isClient) {
     return next();
   }));
 
-  Tinytest.addAsync('status - session userId deleted on server', (test, next) => Meteor.call('grabSessions', function (err, res) {
+  Tinytest.addAsync('status - session userId deleted on server', (test, next) => Meteor.call('grabSessions', (err, res) => {
     test.isUndefined(err);
     test.length(res, 1);
 

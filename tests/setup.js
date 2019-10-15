@@ -23,7 +23,7 @@ export const getCleanupWrapper = function (settings) {
   const { after } = settings;
   // Take a function...
   return fn => // Return a function that, when called, executes the hooks around the function.
-    (function () {
+    (() => {
       const next = arguments[1];
       if (typeof before === 'function') {
         before();
@@ -42,7 +42,7 @@ export const getCleanupWrapper = function (settings) {
         }
       } else {
         // Asynchronous version - Tinytest.addAsync
-        const hookedNext = function () {
+        const hookedNext = () => {
           if (typeof after === 'function') {
             after();
           }

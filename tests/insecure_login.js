@@ -10,16 +10,16 @@ import { _ } from 'underscore';
 export const InsecureLogin = {
   queue: [],
   ran: false,
-  ready: function (callback) {
+  ready: (callback) => {
     this.queue.push(callback);
     if (this.ran) this.unwind();
   },
-  run: function () {
+  run: () => {
     this.ran = true;
     this.unwind();
   },
-  unwind: function () {
-    _.each(this.queue, function (callback) {
+  unwind: () => {
+    _.each(this.queue, (callback) => {
       callback();
     });
     this.queue = [];
@@ -31,7 +31,7 @@ if (Meteor.isClient) {
     methodArguments: [{
       username: 'InsecureLogin'
     }],
-    userCallback: function (err) {
+    userCallback: (err) => {
       if (err) throw err;
       console.info('Insecure login successful!');
       InsecureLogin.run();
@@ -55,7 +55,7 @@ if (Meteor.isServer) {
     });
   }
 
-  Accounts.registerLoginHandler(function (options) {
+  Accounts.registerLoginHandler((options) => {
     if (!options.username) return;
 
     var user = Meteor.users.findOne({

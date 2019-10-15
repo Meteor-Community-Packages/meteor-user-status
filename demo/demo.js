@@ -16,7 +16,7 @@ import { moment } from 'moment';
 if (Meteor.isClient) {
   const UserConnections = new Mongo.Collection('user_status_sessions');
 
-  const relativeTime = function (timeAgo) {
+  const relativeTime = (timeAgo) => {
     const diff = moment.utc(TimeSync.serverTime() - timeAgo);
     const time = diff.format('H:mm:ss');
     const days = +diff.format('DDD') - 1;
@@ -125,7 +125,7 @@ if (Meteor.isClient) {
       e.preventDefault();
       const input = tmpl.find('input[name=username]');
       input.blur();
-      return Meteor.insecureUserLogin(input.value, function (err) {
+      return Meteor.insecureUserLogin(input.value, (err) => {
         if (err) {
           return console.log(err);
         }
@@ -134,7 +134,7 @@ if (Meteor.isClient) {
   };
 
   // Start monitor as soon as we got a signal, captain!
-  Tracker.autorun(function (c) {
+  Tracker.autorun((c) => {
     try { // May be an error if time is not synced
       UserStatus.startMonitor({
         threshold: 30000,

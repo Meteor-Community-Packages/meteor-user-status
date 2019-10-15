@@ -74,7 +74,7 @@ var MonitorInternals = {
 
 };
 
-const start = function (settings) {
+const start = (settings) => {
   if (!TimeSync.isSynced()) {
     throw new Error('Can\'t start idle monitor until synced to server');
   }
@@ -106,7 +106,7 @@ const start = function (settings) {
   monitor();
 };
 
-const stop = function () {
+const stop = () => {
   if (!monitorId) {
     throw new Error('Idle monitor is not running.');
   }
@@ -125,7 +125,7 @@ const stop = function () {
 
 };
 
-var monitor = function (setAction) {
+var monitor = (setAction) => {
   // Ignore focus/blur events when we aren't monitoring
   if (!monitorId) {
     return;
@@ -153,7 +153,7 @@ var monitor = function (setAction) {
   }
 };
 
-const touch = function () {
+const touch = () => {
   if (!monitorId) {
     Meteor._debug('Cannot touch as idle monitor is not running.');
     return;
@@ -161,17 +161,17 @@ const touch = function () {
   return monitor(true); // Check for an idle state change right now
 };
 
-const isIdle = function () {
+const isIdle = () => {
   idleDep.depend();
   return idle;
 };
 
-const isMonitoring = function () {
+const isMonitoring = () => {
   monitorDep.depend();
   return (monitorId != null);
 };
 
-const lastActivity = function () {
+const lastActivity = () => {
   if (!isMonitoring()) {
     return;
   }
@@ -179,7 +179,7 @@ const lastActivity = function () {
   return lastActivityTime;
 };
 
-Meteor.startup(function () {
+Meteor.startup(() => {
   // Listen for mouse and keyboard events on window
   // TODO other stuff - e.g. touch events?
   window.addEventListener('click', () => monitor(true));
@@ -203,7 +203,7 @@ Meteor.startup(function () {
   focused = document.hasFocus();
 
   // Report idle status whenever connection changes
-  Tracker.autorun(function () {
+  Tracker.autorun(() => {
     // Don't report idle state unless we're monitoring
     if (!isMonitoring()) {
       return;
@@ -222,7 +222,7 @@ Meteor.startup(function () {
 
   // If we reconnect and we were idle, make sure we send that upstream
   let wasConnected = Meteor.status().connected;
-  return Tracker.autorun(function () {
+  return Tracker.autorun(() => {
     const {
       connected
     } = Meteor.status();

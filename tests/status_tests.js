@@ -59,9 +59,9 @@ const withCleanup = getCleanupWrapper({
 });
 
 // Clean up before we add any tests just in case some crap left over from before
-withCleanup(function () {});
+withCleanup(() => {});
 
-Tinytest.add('status - adding anonymous session', withCleanup(function (test) {
+Tinytest.add('status - adding anonymous session', withCleanup((test) => {
   const conn = randomConnection();
 
   StatusInternals.addSession(conn);
@@ -76,7 +76,7 @@ Tinytest.add('status - adding anonymous session', withCleanup(function (test) {
   return test.isFalse(doc.loginTime);
 }));
 
-Tinytest.add('status - adding and removing anonymous session', withCleanup(function (test) {
+Tinytest.add('status - adding and removing anonymous session', withCleanup((test) => {
   const conn = randomConnection();
 
   StatusInternals.addSession(conn);
@@ -85,7 +85,7 @@ Tinytest.add('status - adding and removing anonymous session', withCleanup(funct
   return test.isFalse(UserStatus.connections.findOne(conn.id));
 }));
 
-Tinytest.add('status - adding one authenticated session', withCleanup(function (test) {
+Tinytest.add('status - adding one authenticated session', withCleanup((test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
@@ -114,7 +114,7 @@ Tinytest.add('status - adding one authenticated session', withCleanup(function (
   return test.equal(user.status.lastLogin.userAgent, TEST_UA);
 }));
 
-Tinytest.add('status - adding and removing one authenticated session', withCleanup(function (test) {
+Tinytest.add('status - adding and removing one authenticated session', withCleanup((test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
@@ -139,7 +139,7 @@ Tinytest.add('status - adding and removing one authenticated session', withClean
   return test.equal(user.status.lastLogin.date, ts);
 }));
 
-Tinytest.add('status - logout and then close one authenticated session', withCleanup(function (test) {
+Tinytest.add('status - logout and then close one authenticated session', withCleanup((test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
@@ -171,7 +171,7 @@ Tinytest.add('status - logout and then close one authenticated session', withCle
   return test.equal(user.status.lastLogin.date, ts);
 }));
 
-Tinytest.add('status - idling one authenticated session', withCleanup(function (test) {
+Tinytest.add('status - idling one authenticated session', withCleanup((test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
@@ -204,7 +204,7 @@ Tinytest.add('status - idling one authenticated session', withCleanup(function (
   return test.equal(user.status.lastActivity, idleTime);
 }));
 
-Tinytest.add('status - idling and reactivating one authenticated session', withCleanup(function (test) {
+Tinytest.add('status - idling and reactivating one authenticated session', withCleanup((test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
@@ -238,7 +238,7 @@ Tinytest.add('status - idling and reactivating one authenticated session', withC
   return test.isFalse(user.status.lastActivity != null);
 }));
 
-Tinytest.add('status - idling and removing one authenticated session', withCleanup(function (test) {
+Tinytest.add('status - idling and removing one authenticated session', withCleanup((test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
@@ -263,7 +263,7 @@ Tinytest.add('status - idling and removing one authenticated session', withClean
   return test.equal(user.status.lastLogin.date, ts);
 }));
 
-Tinytest.add('status - idling and reconnecting one authenticated session', withCleanup(function (test) {
+Tinytest.add('status - idling and reconnecting one authenticated session', withCleanup((test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
@@ -302,7 +302,7 @@ Tinytest.add('status - idling and reconnecting one authenticated session', withC
   return test.equal(user.status.lastActivity, idleTime);
 }));
 
-Tinytest.add('multiplex - two online sessions', withCleanup(function (test) {
+Tinytest.add('multiplex - two online sessions', withCleanup((test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -322,7 +322,7 @@ Tinytest.add('multiplex - two online sessions', withCleanup(function (test) {
   return test.equal(user.status.lastLogin.date, ts2);
 }));
 
-Tinytest.add('multiplex - two online sessions with one going offline', withCleanup(function (test) {
+Tinytest.add('multiplex - two online sessions with one going offline', withCleanup((test) => {
   let user;
   const conn = randomConnection();
 
@@ -345,7 +345,7 @@ Tinytest.add('multiplex - two online sessions with one going offline', withClean
   return test.equal(user.status.lastLogin.date, ts2);
 }));
 
-Tinytest.add('multiplex - two online sessions to offline', withCleanup(function (test) {
+Tinytest.add('multiplex - two online sessions to offline', withCleanup((test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -368,7 +368,7 @@ Tinytest.add('multiplex - two online sessions to offline', withCleanup(function 
   return test.equal(user.status.lastLogin.date, ts2);
 }));
 
-Tinytest.add('multiplex - idling one of two online sessions', withCleanup(function (test) {
+Tinytest.add('multiplex - idling one of two online sessions', withCleanup((test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -392,7 +392,7 @@ Tinytest.add('multiplex - idling one of two online sessions', withCleanup(functi
   return test.equal(user.status.idle, false);
 }));
 
-Tinytest.add('multiplex - idling two online sessions', withCleanup(function (test) {
+Tinytest.add('multiplex - idling two online sessions', withCleanup((test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -419,7 +419,7 @@ Tinytest.add('multiplex - idling two online sessions', withCleanup(function (tes
   return test.equal(user.status.lastActivity, idle2);
 }));
 
-Tinytest.add('multiplex - idling two then reactivating one session', withCleanup(function (test) {
+Tinytest.add('multiplex - idling two then reactivating one session', withCleanup((test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -448,7 +448,7 @@ Tinytest.add('multiplex - idling two then reactivating one session', withCleanup
   return test.isFalse(user.status.lastActivity != null);
 }));
 
-Tinytest.add('multiplex - logging in while an existing session is idle', withCleanup(function (test) {
+Tinytest.add('multiplex - logging in while an existing session is idle', withCleanup((test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -473,7 +473,7 @@ Tinytest.add('multiplex - logging in while an existing session is idle', withCle
   return test.isFalse(user.status.lastActivity != null);
 }));
 
-Tinytest.add('multiplex - simulate tab switch', withCleanup(function (test) {
+Tinytest.add('multiplex - simulate tab switch', withCleanup((test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -506,7 +506,7 @@ Tinytest.add('multiplex - simulate tab switch', withCleanup(function (test) {
 }));
 
 // Test for idling one session across a disconnection; not most recent idle time
-Tinytest.add('multiplex - disconnection and reconnection while idle', withCleanup(function (test) {
+Tinytest.add('multiplex - disconnection and reconnection while idle', withCleanup((test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -551,7 +551,7 @@ Tinytest.add('multiplex - disconnection and reconnection while idle', withCleanu
   return test.equal(user.status.lastActivity, idle2);
 }));
 
-Tinytest.add('status - user online set to false on startup', withCleanup(function (test) {
+Tinytest.add('status - user online set to false on startup', withCleanup((test) => {
   // special argument to onStartup prevents this from affecting client tests
   StatusInternals.onStartup(TEST_userId);
 

@@ -7,7 +7,7 @@ Package.describe({
   git: 'https://github.com/mizzao/meteor-user-status.git'
 });
 
-Package.onUse(function (api) {
+Package.onUse((api) => {
   api.versionsFrom('1.2.0.1');
 
   api.use('accounts-base');
@@ -32,7 +32,7 @@ Package.onUse(function (api) {
   });
 });
 
-Package.onTest(function (api) {
+Package.onTest((api) => {
   api.use('mizzao:user-status');
   api.use('mizzao:timesync');
 
