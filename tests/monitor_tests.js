@@ -30,10 +30,12 @@ const withCleanup = getCleanupWrapper({
   },
 
   after() {
-    try {
-      return UserStatus.stopMonitor();
-    } catch (error) {
-      console.error(error);
+    if (UserStatus.isMonitoring()) {
+      try {
+        return UserStatus.stopMonitor();
+      } catch (error) {
+        console.error(error);
+      }
     }
   }
 });
