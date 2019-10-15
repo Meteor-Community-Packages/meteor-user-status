@@ -31,14 +31,14 @@ withCleanup = getCleanupWrapper
 
     Meteor.users.update TEST_userId,
       $unset: status: null
-    UserStatus.connections.remove { 
-      $or: [ 
+    UserStatus.connections.remove {
+      $or: [
         { userId: TEST_userId },
         { ipAddr: TEST_IP }
       ]
     }
 
-    Meteor.flush()
+    Deps.flush()
 
 # Clean up before we add any tests just in case some crap left over from before
 withCleanup ->
