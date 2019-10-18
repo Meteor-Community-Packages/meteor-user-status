@@ -194,3 +194,7 @@ Check out https://github.com/mizzao/meteor-accounts-testing for a simple account
 ## Testing
 
 There are some `Tinytest` unit tests that are used to test the logic in this package, but general testing with many users and connections is hard. Hence, we have set up a demo app (http://user-status.meteor.com) for testing that is also hosted as a proof of concept. If you think you've found a bug in the package, try to replicate it on the demo app and post an issue with steps to reproduce.
+
+## Contributing
+
+See [Contributing.md](Contributing.md).
