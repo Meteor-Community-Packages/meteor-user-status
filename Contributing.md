@@ -8,6 +8,12 @@
 - [ ]  If everything worked, `git tag v0.x.y` and push the tag (`git push origin v0.x.y`; this allows others to find the code for this version) and merge into master and push that too. (If you aren't rebasing the feature branch you may want to merge first before publishing)
 - [ ] If publishing didn't work, you can fix things, amend the commit as necessary, then tag and push after verifying that it went through.
 
+In order to `meteor publish`, you will need to be added as a maintainer to this package. You can see a list of the current maintainers with:
+
+```
+meteor admin maintainers mizzao:user-status --list
+```
+
 # Travis CI
 
 To be written.
