@@ -143,7 +143,7 @@ const userSchema = new SimpleSchema({
         type: String,
         optional: true,
     },
-    'status.iddle': {
+    'status.idle': {
         type: Boolean,
         optional: true,
     },
