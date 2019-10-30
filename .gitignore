@@ -1,3 +1,5 @@
 .build*
 .versions
 node_modules
+
+.idea/
