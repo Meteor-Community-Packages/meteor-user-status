@@ -15,7 +15,7 @@ Package.onUse( function(api) {
 
   api.use('deps', 'client');
 
-  api.use('mizzao:timesync@0.3.4');
+  api.use('mizzao:timesync@0.5.1');
 
   api.addFiles('monitor.coffee', 'client');
   api.addFiles('status.coffee', 'server');
