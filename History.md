@@ -13,6 +13,7 @@
 * Changed TravisCI to use Node 8.15.1 and added lint checks
 * Added Visual Studio Code settings.json
 * Changed all tabs to 2 spaces
+* Minimum meteor requirement now 1.3
 
 ## v0.6.8
 
