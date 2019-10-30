@@ -1,4 +1,8 @@
-## vNEXT
+## v0.6.9
+* Update `mizzao:timesync` to 0.5.1
+* Fix broken tests
+* Wrap startup in try/catch. If you are having issues on startup and use collection2, please make sure tha you use the proper schema.
+* Update readme for v0 branch and transfer to `Meteor Community Packages`
 
 ## v0.6.8
 

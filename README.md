@@ -1,4 +1,4 @@
-user-status [![Build Status](https://travis-ci.org/mizzao/meteor-user-status.png?branch=master)](https://travis-ci.org/mizzao/meteor-user-status)
+user-status [![Build Status](https://travis-ci.org/Meteor-Community-Packages/meteor-user-status.png?branch=v0)](https://travis-ci.org/Meteor-Community-Packages/meteor-user-status)
 ===========
 
 ## What's this do?
@@ -9,12 +9,12 @@ some other objects. This allows you to easily see users that are online, for
 applications such as rendering the users box below showing online users in green
 and idle users in orange.
 
-![User online states](https://raw.github.com/mizzao/meteor-user-status/master/docs/example.png)
+![User online states](https://raw.github.com/Meteor-Community-Packages/meteor-user-status/v0/docs/example.png)
 
 For a complete example of what can be tracked, including inactivity, IP
 addresses, and user agents, check out a demo app at
 http://user-status.meteor.com, or its
-[source](https://github.com/mizzao/meteor-user-status/tree/master/demo).
+[source](https://github.com/Meteor-Community-Packages/meteor-user-status/tree/v0/demo).
 
 Help keep your favorite Meteor packages alive! If you depend on this package in
 your app and find it useful, consider a donation at
@@ -37,7 +37,7 @@ for more details.
 
 ## Basic Usage - Online State
 
-This package maintains two types of status: a general user online flag in `Meteor.users`, and some additional data for each session. It uses [timesync](https://github.com/mizzao/meteor-timesync) to maintain the server's time across all clients, regardless of whether they have the correct time.
+This package maintains two types of status: a general user online flag in `Meteor.users`, and some additional data for each session. It uses [timesync](https://github.com/Meteor-Community-Packages/meteor-timesync) to maintain the server's time across all clients, regardless of whether they have the correct time.
 
 `Meteor.users` receives a `status` field will be updated automatically if the user logs in or logs out, closes their browser, or otherwise disconnects. A user is online if at least one connection with that `userId` is logged in. It contains the following fields:
 
@@ -105,7 +105,7 @@ On the client, the `UserStatus` object provides for seamless automatic monitorin
 - `pingMonitor`: if the automatic event handlers aren't catching what you need, you can manually ping the monitor to signal that a user is doing something and reset the idle monitor.
 - `isIdle`: a reactive variable signifying whether the user is currently idle or not.
 - `isMonitoring`: a reactive variable for whether the monitor is running.
-- `lastActivity`: a reactive variable for the last action recorded by the user (according to [server time](https://github.com/mizzao/meteor-timesync)). Since this variable will be invalidated a lot and cause many recomputations, it's best only used for debugging or diagnostics (as in the demo).
+- `lastActivity`: a reactive variable for the last action recorded by the user (according to [server time](https://github.com/Meteor-Community-Packages/meteor-timesync)). Since this variable will be invalidated a lot and cause many recomputations, it's best only used for debugging or diagnostics (as in the demo).
 
 For an example of how the above functions are used, see the demo.
 
