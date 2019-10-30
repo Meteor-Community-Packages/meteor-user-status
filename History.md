@@ -1,6 +1,6 @@
 ## vNEXT
 
-## v0.7.0
+## v1.0.0
 
 * Decaffeinated!
 * Added ESLint and jsbeautify
@@ -10,8 +10,9 @@
 * Upgraded timesync to 0.5.1
 * Formatted all JS, CSS, and HTML files to jsbeautify specs
 * Updated all references of github.com/mizzao to github.com/Meteor-Community-Packages
-* Changed TravisCI to use Node 10.16.0 and added lint checks
+* Changed TravisCI to use Node 8.15.1 and added lint checks
 * Added Visual Studio Code settings.json
+* Changed all tabs to 2 spaces
 
 ## v0.6.8
 
