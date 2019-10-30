@@ -115,6 +115,55 @@ The `UserStatus.connections` (in-memory) collection contains information for all
 - `loginTime`: if authenticated, when the user logged in with this connection.
 - `idle`: `true` if idle monitoring is enabled on this connection and the client has gone idle.
 
+#### Usage with collection2
+
+If your project is using `aldeed:collection2` with a schema attached to `Meteor.users`, you need to add the following items to the schema to allow modifications of the status:
+
+```javascript
+import SimpleSchema from 'simpl-schema';
+
+const userSchema = new SimpleSchema({
+    status: {
+        type: Object,
+        optional: true,
+    },
+    'status.lastlogin': {
+        type: Object,
+        optional: true,
+    },
+    'status.lastlogin.date': {
+        type: Date,
+        optional: true,
+    },
+    'status.lastlogin.ipAddr': {
+        type: String,
+        optional: true,
+    },
+    'status.userAgent': {
+        type: String,
+        optional: true,
+    },
+    'status.iddle': {
+        type: Boolean,
+        optional: true,
+    },
+    'status.lastActivity': {
+        type: Date,
+        optional: true,
+    },
+    'status.online': {
+        type: Boolean,
+        optional: true,
+    },
+});
+
+// attaching the Schema to Meteor.users will extend it
+Meteor.users.attachSchema(userSchema);
+
+```
+
+#### Events
+
 The `UserStatus.events` object is an `EventEmitter` on which you can listen for connections logging in and out. Logging out includes closing the browser; reopening the browser will trigger a new login event. The following events are supported:
 
 #### `UserStatus.events.on("connectionLogin", function(fields) { ... })`
