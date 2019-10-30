@@ -1,33 +1,37 @@
+import { Accounts } from 'meteor/accounts-base';
+import { Meteor } from 'meteor/meteor';
+
 /*
  * Created by https://github.com/matb33 for testing packages that make user of userIds
  * Original file https://github.com/matb33/meteor-collection-hooks/blob/master/tests/insecure_login.js
  */
-
-InsecureLogin = {
+export const InsecureLogin = {
   queue: [],
   ran: false,
-  ready: function (callback) {
-    this.queue.push(callback);
-    if (this.ran) this.unwind();
+  ready: (callback) => {
+    InsecureLogin.queue.push(callback);
+    if (InsecureLogin.ran) InsecureLogin.unwind();
   },
-  run: function () {
-    this.ran = true;
-    this.unwind();
+  run: () => {
+    InsecureLogin.ran = true;
+    InsecureLogin.unwind();
   },
-  unwind: function () {
-    _.each(this.queue, function (callback) {
+  unwind: () => {
+    InsecureLogin.queue.forEach((callback) => {
       callback();
     });
-    this.queue = [];
+    InsecureLogin.queue = [];
   }
 };
 
 if (Meteor.isClient) {
   Accounts.callLoginMethod({
-    methodArguments: [{username: "InsecureLogin"}],
-    userCallback: function (err) {
+    methodArguments: [{
+      username: 'InsecureLogin'
+    }],
+    userCallback: (err) => {
       if (err) throw err;
-      console.info("Insecure login successful!");
+      console.info('Insecure login successful!');
       InsecureLogin.run();
     }
   });
@@ -36,21 +40,25 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
-  // Meteor.users.remove({"username": "InsecureLogin"});
-
-  if (!Meteor.users.find({"username": "InsecureLogin"}).count()) {
+  if (!Meteor.users.find({
+      'username': 'InsecureLogin'
+    }).count()) {
     Accounts.createUser({
-      username: "InsecureLogin",
-      email: "test@test.com",
-      password: "password",
-      profile: {name: "InsecureLogin"}
+      username: 'InsecureLogin',
+      email: 'test@test.com',
+      password: 'password',
+      profile: {
+        name: 'InsecureLogin'
+      }
     });
   }
 
-  Accounts.registerLoginHandler(function (options) {
+  Accounts.registerLoginHandler((options) => {
     if (!options.username) return;
 
-    var user = Meteor.users.findOne({"username": options.username});
+    var user = Meteor.users.findOne({
+      'username': options.username
+    });
     if (!user) return;
 
     return {

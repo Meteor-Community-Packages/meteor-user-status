@@ -1,0 +1,143 @@
+<head>
+  <title>User-Status Demonstration and Testing</title>
+</head>
+
+<body>
+  <a href="https://github.com/Meteor-Community-Packages/meteor-user-status">
+    <img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub">
+  </a>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4 well">
+        <h3>Instructions</h3>
+        <ul>
+          <li>Log in with any username.</li>
+          <li>Log in from other computers with the same username or open multiple tabs.</li>
+          These will appear as sessions/connections under the same user.
+          <li>Click or keypress events reset the idle timer. The default idle threshold is 30 seconds.</li>
+          <li>Idle session information is transmitted to the server and multiplexed into the user document.</li>
+          <li>Play with the idle timer to try different client-side settings.</li>
+          <li>Click 'Resync Time' a few times to see the variance in TimeSync.</li>
+        </ul>
+        {{> login}}
+        {{> status userStatus}}
+      </div>
+      <div class="col-md-8">
+        {{> serverStatus }}
+      </div>
+    </div>
+  </div>
+</body>
+
+<template name="login">
+  {{#if loggedIn}}
+    <h3>You are logged in as:</h3>
+    {{> loginButtons}}
+  {{else}}
+    <form class="form-inline">
+      <p>Enter username to log in:</p>
+      {{! We use the pattern below because it matches \w in in autocomplete for user names}}
+      <input class="form-control" type="text" name="username" required pattern="^[a-zA-Z][a-zA-Z0-9_]{5,12}$" placeholder="Username..." title="6-13 numbers or characters.">
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+  {{/if}}
+</template>
+
+<template name="status">
+  <h3>Local status:</h3>
+
+  <button class="btn btn-success resync">Resync Time</button>
+
+  <dl class="dl-horizontal">
+    <dt>Server Time:</dt>
+    <dd>{{serverTime}}</dd>
+    <dt>Local Offset:</dt>
+    <dd>{{serverOffset}} ms</dd>
+    <dt>RTT:</dt>
+    <dd>{{serverRTT}} ms</dd>
+    <dt>Idle:</dt>
+    <dd>{{isIdleText}}</dd>
+    <dt>Monitor on:</dt>
+    <dd>{{isMonitoringText}}</dd>
+    <dt>Last Activity:</dt>
+    <dd>{{lastActivity}}</dd>
+  </dl>
+
+  {{#if isMonitoring}}
+    <h4>Idle monitoring is on.</h4>
+    <button class="btn btn-danger stop-monitor">Stop Monitor</button>
+  {{else}}
+    <form class="start-monitor">
+      <legend>Start monitor with the following parameters:</legend>
+      <label>Idle Threshold:</label>
+      <input class="form-control" name="threshold" type="number" min="5000" step="1" value="30000" required>
+      <label>Monitor Interval:</label>
+      <input class="form-control" name="interval" type="number" min="1000" step="1" value="1000" required>
+      <label>Idle on window blur:</label>
+      <select class="form-control" name="idleOnBlur" required>
+        <option value="true" selected>true</option>
+        <option value="false">false</option>
+      </select>
+      <button type="submit" class="btn btn-primary pull-right">Start Monitor</button>
+    </form>
+  {{/if}}
+</template>
+
+<template name="serverStatus">
+  <h3>All user connections on server:</h3>
+
+  <table class="table table-condensed table-striped table-hover">
+    <thead>
+      <tr>
+        <th>Username/Connection</th>
+        <th>Idle</th>
+        <th>Last Activity</th>
+        <th>IP (<i>Last</i>)</th>
+        <th style="width: 256px">User Agent (<i>Last</i>)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each anonymous}}
+        {{> serverConnection}}
+      {{/each}}
+      {{#each users}}
+        <tr class="bold {{userClass}}">
+          <td>{{username}}<br>(last login {{localeTime status.lastLogin.date}})</td>
+          <td>{{status.idle}}</td>
+          <td>{{#with status.lastActivity}}
+              {{> relTime}}
+      {{else}}
+        (active or not monitoring)
+            {{/with}}
+          </td>
+          <td><i>{{status.lastLogin.ipAddr}}</i></td>
+          <td><i>{{status.lastLogin.userAgent}}</i></td>
+        </tr>
+        {{#each connections}}
+          {{> serverConnection}}
+        {{/each}}
+      {{/each}}
+    </tbody>
+  </table>
+</template>
+
+<template name="serverConnection">
+  <tr class="{{connectionClass}}">
+    <td>{{_id}}{{#with loginTime}}<br>(login {{this}}){{/with}}</td>
+    <td>{{idle}}</td>
+    <td>{{#with lastActivity}}
+        {{> relTime}}
+        {{else}}
+          (active or not monitoring)
+      {{/with}}
+    </td>
+    <td>{{ipAddr}}</td>
+    <td>{{userAgent}}</td>
+  </tr>
+</template>
+
+<template name="relTime">
+  {{localeTime this}}
+  <br>
+  ({{relativeTime this}})
+</template>

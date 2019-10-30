@@ -1,0 +1,30 @@
+{
+  "name": "meteor-user-status",
+  "version": "0.7.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Meteor-Community-Packages/meteor-user-status.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Meteor-Community-Packages/meteor-user-status/issues"
+  },
+  "homepage": "https://github.com/Meteor-Community-Packages/meteor-user-status#readme",
+  "private": false,
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint .",
+    "test": "make test",
+    "test-local": "meteor test-packages --once --driver-package test-in-console"
+  },
+  "devDependencies": {
+    "autoprefixer": "^9.6.1",
+    "babel-eslint": "^10.0.3",
+    "eslint": "^5.16.0",
+    "husky": "^3.0.5",
+    "mocha": "^6.2.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
+  }
+}

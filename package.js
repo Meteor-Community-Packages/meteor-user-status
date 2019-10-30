@@ -1,48 +1,54 @@
+/* eslint-disable no-undef */
+
 Package.describe({
-  name: "mizzao:user-status",
-  summary: "User connection and idle state tracking for Meteor",
-  version: "0.6.8",
-  git: "https://github.com/mizzao/meteor-user-status.git"
+  name: 'mizzao:user-status',
+  summary: 'User connection and idle state tracking for Meteor',
+  version: '1.0.0',
+  git: 'https://github.com/mizzao/meteor-user-status.git'
 });
 
-Package.onUse( function(api) {
-  api.versionsFrom("1.2.0.1");
+Package.onUse((api) => {
+  api.versionsFrom('1.7.0.5');
 
+  api.use('ecmascript');
   api.use('accounts-base');
   api.use('check');
-  api.use(['coffeescript@1.0.9||2.0.0', 'underscore']);
+  api.use('underscore');
   api.use('mongo');
+  api.use('tracker', 'client');
+  api.use('mizzao:timesync@0.5.1');
 
-  api.use('deps', 'client');
+  api.export('MonitorInternals', 'client', {
+    testOnly: true
+  });
+  api.export('StatusInternals', 'server', {
+    testOnly: true
+  });
 
-  api.use('mizzao:timesync@0.3.4');
+  api.mainModule('client/monitor.js', 'client');
+  api.mainModule('server/status.js', 'server');
 
-  api.addFiles('monitor.coffee', 'client');
-  api.addFiles('status.coffee', 'server');
-
-  api.export('UserStatus'); // on both
-
-  api.export('MonitorInternals', 'client', {testOnly: true});
-  api.export('StatusInternals', 'server', {testOnly: true});
 });
 
-Package.onTest( function(api) {
+Package.onTest((api) => {
+  api.use('ecmascript');
   api.use('mizzao:user-status');
-  api.use('mizzao:timesync');
+  api.use('mizzao:timesync@0.5.1');
 
   api.use(['accounts-base', 'accounts-password']);
-  api.use(['coffeescript@1.0.9||2.0.0', 'underscore']);
+  api.use('underscore');
 
   api.use(['random', 'tracker']);
 
   api.use('test-helpers');
   api.use('tinytest');
 
-  api.addFiles("tests/insecure_login.js");
-  api.addFiles('tests/setup.coffee');
+  api.addFiles('tests/insecure_login.js');
+  api.addFiles('tests/setup.js');
   // Just some unit tests here. Use the test app otherwise.
-  api.addFiles('tests/monitor_tests.coffee', 'client');
-  api.addFiles('tests/status_tests.coffee', 'server');
+  api.addFiles('tests/monitor_tests.js', 'client');
+  api.addFiles('tests/status_tests.js', 'server');
 
-  api.addFiles('tests/server_client_tests.coffee');
+  api.addFiles('tests/server_tests.js', 'server');
+  api.addFiles('tests/client_tests.js', 'client');
 });

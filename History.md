@@ -1,5 +1,20 @@
 ## vNEXT
 
+## v1.0.0
+
+* Decaffeinated!
+* Added ESLint and jsbeautify
+* Added husky for pre-commit lint checking
+* Don't try to stop monitor in testing if it's not started
+* Upgrade demo to Meteor 1.8.1
+* Upgraded timesync to 0.5.1
+* Formatted all JS, CSS, and HTML files to jsbeautify specs
+* Updated all references of github.com/mizzao to github.com/Meteor-Community-Packages
+* Changed TravisCI to use Node 8.15.1 and added lint checks
+* Added Visual Studio Code settings.json
+* Changed all tabs to 2 spaces
+* Minimum meteor requirement now 1.7.0.5
+
 ## v0.6.8
 
 * Updated Coffeescript dependency to allow both v1 and v2.
