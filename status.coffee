@@ -99,17 +99,23 @@ statusEvents.on "connectionActive", (advice) ->
 
 # Reset online status on startup (users will reconnect)
 onStartup = (selector = {}) ->
-  Meteor.users.update selector,
-    {
-      $set: {
-        "status.online": false
+  updateCount = 0
+  try
+    updateCount = Meteor.users.update selector,
+      {
+        $set: {
+          "status.online": false
+        },
+        $unset: {
+          "status.idle": null
+          "status.lastActivity": null
+        }
       },
-      $unset: {
-        "status.idle": null
-        "status.lastActivity": null
-      }
-    },
-    { multi: true }
+      { multi: true }
+  catch e
+    console.log 'UserStatus.onStartup() error setting user status: ', e
+  updateCount
+  
 
 ###
   Local session modifification functions - also used in testing
