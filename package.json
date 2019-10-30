@@ -26,8 +26,5 @@
     "hooks": {
       "pre-commit": "npm run lint"
     }
-  },
-  "dependencies": {
-    "bcrypt": "^3.0.6"
   }
 }
