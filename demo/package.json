@@ -8,14 +8,14 @@
     "visualize": "meteor --production --extra-packages bundle-visualizer"
   },
   "dependencies": {
-    "@babel/runtime": "^7.6.0",
-    "bcrypt": "^3.0.6",
-    "moment": "^2.24.0",
-    "underscore": "^1.9.1"
+    "@babel/runtime": "^7.10.3",
+    "bcrypt": "^3.0.8",
+    "moment": "^2.27.0",
+    "underscore": "^1.10.2"
   },
   "devDependencies": {
-    "autoprefixer": "^9.6.1",
-    "babel-eslint": "^10.0.3"
+    "autoprefixer": "^9.8.4",
+    "babel-eslint": "^10.1.0"
   },
   "meteor": {
     "mainModule": {
