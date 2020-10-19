@@ -9,7 +9,6 @@ import { Accounts } from 'meteor/accounts-base';
 import { check, Match } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
-import { _ } from 'meteor/underscore';
 import { EventEmitter } from 'events';
 
 const UserConnections = new Mongo.Collection('user_status_sessions', {
@@ -45,7 +44,7 @@ statusEvents.on('connectionLogin', (advice) => {
   const conns = UserConnections.find({
     userId: advice.userId
   }).fetch();
-  if (!_.every(conns, c => c.idle)) {
+  if (!conns.every(c => c.idle)) {
     update.$set['status.idle'] = false;
     update.$unset = {
       'status.lastActivity': null
@@ -72,7 +71,7 @@ statusEvents.on('connectionLogout', (advice) => {
         'status.lastActivity': null
       }
     });
-  } else if (_.every(conns, c => c.idle)) {
+  } else if (conns.every(c => c.idle)) {
     /*
       All remaining connections are idle:
       - If the last active connection quit, then we should go idle with the most recent activity
@@ -85,10 +84,11 @@ statusEvents.on('connectionLogout', (advice) => {
       return;
     } // The dropped connection was already idle
 
+    const latestLastActivity = new Date(Math.max(...conns.map(conn => conn.lastActivity)));
     Meteor.users.update(advice.userId, {
       $set: {
         'status.idle': true,
-        'status.lastActivity': _.max(_.pluck(conns, 'lastActivity'))
+        'status.lastActivity': latestLastActivity
       }
     });
   }
@@ -105,17 +105,18 @@ statusEvents.on('connectionIdle', (advice) => {
   const conns = UserConnections.find({
     userId: advice.userId
   }).fetch();
-  if (!_.every(conns, c => c.idle)) {
+  if (!conns.every(c => c.idle)) {
     return;
   }
   // Set user to idle if all the connections are idle
   // This will not be the most recent idle across a disconnection, so we use max
 
   // TODO: the race happens here where everyone was idle when we looked for them but now one of them isn't.
+  const latestLastActivity = new Date(Math.max(...conns.map(conn => conn.lastActivity)));
   Meteor.users.update(advice.userId, {
     $set: {
       'status.idle': true,
-      'status.lastActivity': _.max(_.pluck(conns, 'lastActivity'))
+      'status.lastActivity': latestLastActivity
     }
   });
 });

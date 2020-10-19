@@ -13,7 +13,6 @@ Package.onUse((api) => {
   api.use('ecmascript');
   api.use('accounts-base');
   api.use('check');
-  api.use('underscore');
   api.use('mongo');
   api.use('tracker', 'client');
   api.use('mizzao:timesync@0.5.1');
@@ -36,7 +35,6 @@ Package.onTest((api) => {
   api.use('mizzao:timesync@0.5.1');
 
   api.use(['accounts-base', 'accounts-password']);
-  api.use('underscore');
 
   api.use(['random', 'tracker']);
 
