@@ -13,7 +13,8 @@
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
     "test": "make test",
-    "test-local": "meteor test-packages --once --driver-package test-in-console"
+    "test-local": "meteor test-packages --once --driver-package test-in-console",
+    "publish": "meteor npm i && npm prune --production && meteor publish && meteor npm i"
   },
   "devDependencies": {
     "autoprefixer": "^10.0.1",
