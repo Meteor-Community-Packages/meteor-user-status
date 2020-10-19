@@ -16,15 +16,16 @@
     "test-local": "meteor test-packages --once --driver-package test-in-console"
   },
   "devDependencies": {
-    "autoprefixer": "^9.8.4",
+    "autoprefixer": "^10.0.1",
     "babel-eslint": "^10.1.0",
-    "eslint": "^6.8.0",
-    "husky": "^3.1.0",
-    "mocha": "^6.2.3"
+    "eslint": "^7.11.0",
+    "husky": "^4.3.0",
+    "mocha": "^8.2.0"
   },
   "husky": {
     "hooks": {
       "pre-commit": "npm run lint"
     }
-  }
+  },
+  "dependencies": {}
 }
