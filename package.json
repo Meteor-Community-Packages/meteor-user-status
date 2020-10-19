@@ -1,6 +1,6 @@
 {
   "name": "meteor-user-status",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Meteor-Community-Packages/meteor-user-status.git"
@@ -16,15 +16,16 @@
     "test-local": "meteor test-packages --once --driver-package test-in-console"
   },
   "devDependencies": {
-    "autoprefixer": "^9.7.0",
-    "babel-eslint": "^10.0.3",
-    "eslint": "^6.6.0",
-    "husky": "^3.0.9",
-    "mocha": "^6.2.2"
+    "autoprefixer": "^10.0.1",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.11.0",
+    "husky": "^4.3.0",
+    "mocha": "^8.2.0"
   },
   "husky": {
     "hooks": {
       "pre-commit": "npm run lint"
     }
-  }
+  },
+  "dependencies": {}
 }

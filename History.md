@@ -1,5 +1,9 @@
 ## vNEXT
 
+## v1.0.1
+
+* Bumped dependency versions
+
 ## v1.0.0
 
 * Decaffeinated!
