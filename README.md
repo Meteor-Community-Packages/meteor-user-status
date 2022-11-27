@@ -134,19 +134,19 @@ const userSchema = new SimpleSchema({
         type: Object,
         optional: true,
     },
-    'status.lastlogin': {
+    'status.lastLogin': {
         type: Object,
         optional: true,
     },
-    'status.lastlogin.date': {
+    'status.lastLogin.date': {
         type: Date,
         optional: true,
     },
-    'status.lastlogin.ipAddr': {
+    'status.lastLogin.ipAddr': {
         type: String,
         optional: true,
     },
-    'status.userAgent': {
+    'status.lastLogin.userAgent': {
         type: String,
         optional: true,
     },
