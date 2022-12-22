@@ -15,7 +15,7 @@ const UserConnections = new Mongo.Collection('user_status_sessions', {
   connection: null
 });
 
-const statusEvents = new(EventEmitter)();
+const statusEvents = new (EventEmitter)();
 
 /*
   Multiplex login/logout events to status.online
@@ -134,19 +134,21 @@ statusEvents.on('connectionActive', (advice) => {
 
 // Reset online status on startup (users will reconnect)
 const onStartup = (selector) => {
-  if (selector == null) {
-    selector = {};
-  }
-  return Meteor.users.update(selector, {
-    $set: {
-      'status.online': false
-    },
-    $unset: {
-      'status.idle': null,
-      'status.lastActivity': null
+  Meteor.defer(() => {
+    if (selector == null) {
+      selector = { 'status.online': true };
     }
-  }, {
-    multi: true
+    return Meteor.users.update(selector, {
+      $set: {
+        'status.online': false
+      },
+      $unset: {
+        'status.idle': null,
+        'status.lastActivity': null
+      }
+    }, {
+      multi: true
+    });
   });
 };
 
@@ -184,11 +186,11 @@ const loginSession = (connection, date, userId) => {
 const tryLogoutSession = (connection, date) => {
   let conn;
   if ((conn = UserConnections.findOne({
-      _id: connection.id,
-      userId: {
-        $exists: true
-      }
-    })) == null) {
+    _id: connection.id,
+    userId: {
+      $exists: true
+    }
+  })) == null) {
     return false;
   }
 
