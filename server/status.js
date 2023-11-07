@@ -135,7 +135,7 @@ statusEvents.on('connectionActive', (advice) => {
 // Reset online status on startup (users will reconnect)
 const onStartup = (selector) => {
   if (selector == null) {
-    selector = {};
+    selector = { "status.online": true }; // prevent updating ALL users unnecessarily 
   }
   return Meteor.users.update(selector, {
     $set: {
