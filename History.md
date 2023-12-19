@@ -1,5 +1,10 @@
 ## vNEXT
 
+## v1.0.2
+
+* Bumped dependency versions
+* 
+
 ## v1.0.1
 
 * Bumped dependency versions

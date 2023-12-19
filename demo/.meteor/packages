@@ -7,7 +7,7 @@
 meteor-base             # Packages every Meteor app needs to have
 mobile-experience       # Packages for a great mobile UX
 mongo                   # The database Meteor supports right now
-blaze-html-templates # Compile .html files into Meteor Blaze views
+blaze-html-templates    # Compile .html files into Meteor Blaze views
 reactive-var            # Reactive variable for tracker
 tracker                 # Meteor's client-side reactive programming library
 
@@ -19,5 +19,8 @@ shell-server            # Server-side component of the `meteor shell` command
 
 communitypackages:accounts-testing
 mizzao:timesync
-mizzao:user-status@1.0.2
+mizzao:user-status
 twbs:bootstrap
+dynamic-import
+underscore
+jquery

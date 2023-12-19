@@ -8,12 +8,13 @@
     "visualize": "meteor --production --extra-packages bundle-visualizer"
   },
   "dependencies": {
-    "@babel/runtime": "^7.12.1",
-    "bcrypt": "^5.0.0",
+    "@babel/runtime": "^7.23.6",
+    "bcrypt": "^5.1.1",
+    "jquery": "^3.7.1",
     "moment": "^2.29.4"
   },
   "devDependencies": {
-    "autoprefixer": "^10.0.1",
+    "autoprefixer": "^10.4.16",
     "babel-eslint": "^10.1.0"
   },
   "meteor": {
