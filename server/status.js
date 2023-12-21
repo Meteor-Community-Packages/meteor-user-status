@@ -15,7 +15,7 @@ const UserConnections = new Mongo.Collection('user_status_sessions', {
   connection: null
 });
 
-const statusEvents = new(EventEmitter)();
+const statusEvents = new (EventEmitter)();
 
 /*
   Multiplex login/logout events to status.online
@@ -135,7 +135,7 @@ statusEvents.on('connectionActive', (advice) => {
 // Reset online status on startup (users will reconnect)
 const onStartup = (selector) => {
   if (selector == null) {
-    selector = { $or: [{ "status.online": true }, { "status.idle": { $exists: true } }, { "status.lastActivity": { $exists: true } }] }; // prevent updating ALL users unnecessarily 
+    selector = Meteor?.settings?.packages?.['mizzao:user-status']?.startupQuerySelector || {};
   }
   return Meteor.users.update(selector, {
     $set: {
@@ -184,11 +184,11 @@ const loginSession = (connection, date, userId) => {
 const tryLogoutSession = (connection, date) => {
   let conn;
   if ((conn = UserConnections.findOne({
-      _id: connection.id,
-      userId: {
-        $exists: true
-      }
-    })) == null) {
+    _id: connection.id,
+    userId: {
+      $exists: true
+    }
+  })) == null) {
     return false;
   }
 
