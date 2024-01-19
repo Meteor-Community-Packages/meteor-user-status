@@ -136,7 +136,7 @@ statusEvents.on('connectionActive', (advice) => {
 const onStartup = (selector) => {
   Meteor.defer(() => {
     if (selector == null) {
-      selector = { 'status.online': true };
+      selector = Meteor?.settings?.packages?.['mizzao:user-status']?.startupQuerySelector || { 'status.online': true };
     }
     return Meteor.users.update(selector, {
       $set: {
