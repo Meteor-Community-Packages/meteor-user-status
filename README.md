@@ -122,6 +122,20 @@ The `UserStatus.connections` (in-memory) collection contains information for all
 - `loginTime`: if authenticated, when the user logged in with this connection.
 - `idle`: `true` if idle monitoring is enabled on this connection and the client has gone idle.
 
+#### startupQuerySelector (Optional)
+
+On startup `meteor-user-status` automatically resets all users to `offline` and then marks each `online` as connections are reestablished. 
+
+To customize this functionality you can use the `startupQuerySelector` [Meteor package option](https://docs.meteor.com/api/packagejs.html#options) like this:
+```javascript
+  "packages": {
+    "mizzao:user-status": {
+      "startupQuerySelector": { "$or": [{ "status.online": true }, { "status.idle": { "$exists": true } }, { "status.lastActivity": { "$exists": true } }] }
+    }
+  }
+```
+The above example reduces server/database load during startup if you have a large number of users.
+
 #### Usage with collection2
 
 If your project is using `aldeed:collection2` with a schema attached to `Meteor.users`, you need to add the following items to the schema to allow modifications of the status:
