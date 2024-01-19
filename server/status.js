@@ -135,7 +135,7 @@ statusEvents.on('connectionActive', (advice) => {
 // Reset online status on startup (users will reconnect)
 const onStartup = (selector) => {
   if (selector == null) {
-    selector = {};
+    selector = Meteor?.settings?.packages?.['mizzao:user-status']?.startupQuerySelector || {};
   }
   return Meteor.users.update(selector, {
     $set: {
