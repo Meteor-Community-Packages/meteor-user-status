@@ -1,13 +1,6 @@
 user-status
 ===========
 
-[![Build Status](https://travis-ci.org/Meteor-Community-Packages/meteor-user-status.png?branch=master)](https://travis-ci.org/Meteor-Community-Packages/meteor-user-status)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/Meteor-Community-Packages/meteor-user-status.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Meteor-Community-Packages/meteor-user-status/alerts/)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/Meteor-Community-Packages/meteor-user-status.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Meteor-Community-Packages/meteor-user-status/context:javascript)
-[![Project Dependencies](https://david-dm.org/Meteor-Community-Packages/meteor-user-status.svg)](https://david-dm.org/Meteor-Community-Packages/meteor-user-status)
-[![devDependencies Status](https://david-dm.org/Meteor-Community-Packages/meteor-user-status/dev-status.svg)](https://david-dm.org/Meteor-Community-Packages/meteor-user-status?type=dev)
-
-
 ## What's this do?
 
 Keeps track of user connection data, such as IP addresses, user agents, and
@@ -122,6 +115,20 @@ The `UserStatus.connections` (in-memory) collection contains information for all
 - `loginTime`: if authenticated, when the user logged in with this connection.
 - `idle`: `true` if idle monitoring is enabled on this connection and the client has gone idle.
 
+#### startupQuerySelector (Optional)
+
+On startup `meteor-user-status` automatically resets all users to `offline` and then marks each `online` as connections are reestablished. 
+
+To customize this functionality you can use the `startupQuerySelector` [Meteor package option](https://docs.meteor.com/api/packagejs.html#options) like this:
+```javascript
+  "packages": {
+    "mizzao:user-status": {
+      "startupQuerySelector": { "$or": [{ "status.online": true }, { "status.idle": { "$exists": true } }, { "status.lastActivity": { "$exists": true } }] }
+    }
+  }
+```
+The above example reduces server/database load during startup if you have a large number of users.
+
 #### Usage with collection2
 
 If your project is using `aldeed:collection2` with a schema attached to `Meteor.users`, you need to add the following items to the schema to allow modifications of the status:
@@ -190,6 +197,23 @@ The `UserStatus.events` object is an `EventEmitter` on which you can listen for 
 `fields` contains `userId`, `connectionId`, and `lastActivity`.
 
 Check out https://github.com/mizzao/meteor-accounts-testing for a simple accounts drop-in that you can use to test your app - this is also used in the demo.
+
+#### Startup selector
+By default, the startup selector for resetting user status is `{}`.
+If you want to change that you can set the default selector in your settings.json file:
+
+```json
+{
+  "packages": {
+    "mizzao:user-status": {
+      "startupQuerySelector": {
+        // your selector here, for example:
+        "profile.name": "admin"
+      }
+    }
+  }
+}
+```
 
 ## Testing
 

@@ -24,7 +24,7 @@ const activityDep = new Tracker.Dependency;
 let focused = true;
 
 // These settings are internal or exported for test only
-export let MonitorInternals = {
+export const MonitorInternals = {
   idleThreshold: null,
   idleOnBlur: false,
 
@@ -125,7 +125,7 @@ const stop = () => {
 
 };
 
-var monitor = (setAction) => {
+const monitor = (setAction) => {
   // Ignore focus/blur events when we aren't monitoring
   if (!monitorId) {
     return;
