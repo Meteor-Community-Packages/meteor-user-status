@@ -1,5 +1,8 @@
 ## vNEXT
 
+## v1.1.1
+* Add newer Meteor versions to `versionsFrom`
+
 ## v1.1.0
 
 * Bumped dependency versions
