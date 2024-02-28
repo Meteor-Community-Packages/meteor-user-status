@@ -134,19 +134,21 @@ statusEvents.on('connectionActive', (advice) => {
 
 // Reset online status on startup (users will reconnect)
 const onStartup = (selector) => {
-  if (selector == null) {
-    selector = Meteor?.settings?.packages?.['mizzao:user-status']?.startupQuerySelector || {};
-  }
-  return Meteor.users.update(selector, {
-    $set: {
-      'status.online': false
-    },
-    $unset: {
-      'status.idle': null,
-      'status.lastActivity': null
+  Meteor.defer(() => {
+    if (selector == null) {
+      selector = Meteor?.settings?.packages?.['mizzao:user-status']?.startupQuerySelector || { 'status.online': true };
     }
-  }, {
-    multi: true
+    return Meteor.users.update(selector, {
+      $set: {
+        'status.online': false
+      },
+      $unset: {
+        'status.idle': null,
+        'status.lastActivity': null
+      }
+    }, {
+      multi: true
+    });
   });
 };
 
