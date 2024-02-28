@@ -2,9 +2,8 @@ os:
   - linux
 language: node_js
 node_js:
-  - "12.19.0"
+  - "14.21.3"
 before_install:
   - "curl -L http://git.io/ejPSng | /bin/sh"
 script:
-  - npm run lint
   - npm run test

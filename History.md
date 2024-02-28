@@ -1,5 +1,11 @@
 ## vNEXT
 
+## v1.1.0
+
+* Bumped dependency versions
+* Updated tests
+* `Meteor.settings?.packages?.['mizzao:user-status']?.startupQuerySelector` option added to allow for custom startup selector
+
 ## v1.0.1
 
 * Bumped dependency versions

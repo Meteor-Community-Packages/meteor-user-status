@@ -205,6 +205,23 @@ The `UserStatus.events` object is an `EventEmitter` on which you can listen for 
 
 Check out https://github.com/mizzao/meteor-accounts-testing for a simple accounts drop-in that you can use to test your app - this is also used in the demo.
 
+#### Startup selector
+By default, the startup selector for resetting user status is `{}`.
+If you want to change that you can set the default selector in your settings.json file:
+
+```json
+{
+  "packages": {
+    "mizzao:user-status": {
+      "startupQuerySelector": {
+        // your selector here, for example:
+        "profile.name": "admin"
+      }
+    }
+  }
+}
+```
+
 ## Testing
 
 There are some `Tinytest` unit tests that are used to test the logic in this package, but general testing with many users and connections is hard. Hence, we have set up a demo app (http://user-status.meteor.com) for testing that is also hosted as a proof of concept. If you think you've found a bug in the package, try to replicate it on the demo app and post an issue with steps to reproduce.

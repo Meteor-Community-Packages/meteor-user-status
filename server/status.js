@@ -75,7 +75,7 @@ statusEvents.on('connectionLogout', (advice) => {
     /*
       All remaining connections are idle:
       - If the last active connection quit, then we should go idle with the most recent activity
-
+ 
       - If an idle connection quit, nothing should happen; specifically, if the
         most recently active idle connection quit, we shouldn't tick the value backwards.
         This may result in a no-op so we can be smart and skip the update.
