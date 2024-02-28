@@ -1,13 +1,6 @@
 user-status
 ===========
 
-[![Build Status](https://travis-ci.org/Meteor-Community-Packages/meteor-user-status.png?branch=master)](https://travis-ci.org/Meteor-Community-Packages/meteor-user-status)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/Meteor-Community-Packages/meteor-user-status.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Meteor-Community-Packages/meteor-user-status/alerts/)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/Meteor-Community-Packages/meteor-user-status.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Meteor-Community-Packages/meteor-user-status/context:javascript)
-[![Project Dependencies](https://david-dm.org/Meteor-Community-Packages/meteor-user-status.svg)](https://david-dm.org/Meteor-Community-Packages/meteor-user-status)
-[![devDependencies Status](https://david-dm.org/Meteor-Community-Packages/meteor-user-status/dev-status.svg)](https://david-dm.org/Meteor-Community-Packages/meteor-user-status?type=dev)
-
-
 ## What's this do?
 
 Keeps track of user connection data, such as IP addresses, user agents, and
