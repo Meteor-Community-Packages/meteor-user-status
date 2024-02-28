@@ -17,9 +17,9 @@ export const InsecureLogin = {
     InsecureLogin.unwind();
   },
   unwind: () => {
-    InsecureLogin.queue.forEach((callback) => {
+    for (const callback of InsecureLogin.queue) {
       callback();
-    });
+    }
     InsecureLogin.queue = [];
   }
 };
