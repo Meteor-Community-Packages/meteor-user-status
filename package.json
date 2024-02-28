@@ -17,8 +17,9 @@
     "publish": "meteor npm i && npm prune --production && meteor publish && meteor npm i"
   },
   "devDependencies": {
+    "@babel/core": "^7.23.9",
+    "@babel/eslint-parser": "^7.23.10",
     "autoprefixer": "^10.4.17",
-    "babel-eslint": "^10.1.0",
     "eslint": "^8.56.0",
     "husky": "^8.0.3",
     "mocha": "^10.2.0"
