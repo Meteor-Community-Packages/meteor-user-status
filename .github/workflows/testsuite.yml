@@ -12,10 +12,9 @@ jobs:
     strategy:
       matrix:
         meteorRelease:
-          - '1.7.0.5'
-          - '2.8.1'
-          - '2.15'
-          - '3.0-rc.4'
+          - "--release 2.8.1"
+          - "--release 2.15"
+          - "--release 3.0-rc.4"
           # Latest version
     steps:
       - name: Checkout code
@@ -24,12 +23,15 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: "20.x"
 
       - name: Install Dependencies
         run: |
-          curl https://install.meteor.com/\?release\=${{ matrix.meteorRelease }}  | /bin/sh
+          curl https://install.meteor.com | /bin/sh
           npm i -g @zodern/mtest
       - name: Run Tests
         run: |
-          mtest --package ./ --once
+          # Fix using old versions of Meteor
+          export NODE_TLS_REJECT_UNAUTHORIZED=0
+
+          mtest --package ./ --once ${{ matrix.meteorRelease }}
