@@ -32,4 +32,4 @@ jobs:
           npm i -g @zodern/mtest
       - name: Run Tests
         run: |
-          mtest --package ./ --once release ${{ matrix.meteorRelease }}
+          mtest --package ./ --once
