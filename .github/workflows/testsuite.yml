@@ -12,7 +12,6 @@ jobs:
     strategy:
       matrix:
         meteorRelease:
-          - "--release 1.7.0.5"
           - "--release 2.7"
           - "--release 2.8.1"
           - "--release 2.15"
