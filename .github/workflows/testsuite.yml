@@ -15,7 +15,7 @@ jobs:
           - '1.7.0.5'
           - '2.8.1'
           - '2.15'
-          - '3.0-rc.3'
+          - '3.0-rc.4'
           # Latest version
     steps:
       - name: Checkout code
@@ -32,4 +32,4 @@ jobs:
           npm i -g @zodern/mtest
       - name: Run Tests
         run: |
-          mtest --package ./ --once --release ${{ matrix.meteorRelease }}
+          mtest --package ./ --once
