@@ -12,9 +12,9 @@ jobs:
     strategy:
       matrix:
         meteorRelease:
-          - '--release 2.8.1'
-          - '--release 2.15'
-          - '--release 3.0-rc.4'
+          - '2.8.1'
+          - '2.15'
+          - '3.0-rc.4'
           # Latest version
     steps:
       - name: Checkout code
@@ -27,8 +27,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          curl https://install.meteor.com | /bin/sh
+          curl https://install.meteor.com/\?release\=${{ matrix.meteorRelease }}  | /bin/sh
           npm i -g @zodern/mtest
       - name: Run Tests
         run: |
-          mtest --package ./ --once ${{ matrix.meteorRelease }}
+          mtest --package ./ --once --release ${{ matrix.meteorRelease }}
