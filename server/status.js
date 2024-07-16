@@ -138,14 +138,6 @@ const onStartup = async (selector) => {
     selector = Meteor?.settings?.packages?.['mizzao:user-status']?.startupQuerySelector || { 'status.online': true };
   }
   return await Meteor.users.updateAsync(selector, {
-    $set: {
-      'status.online': false
-    },
-    $unset: {
-      'status.idle': null,
-      'status.lastActivity': null
-    }
-    return Meteor.users.update(selector, {
       $set: {
         'status.online': false
       },
@@ -155,8 +147,8 @@ const onStartup = async (selector) => {
       }
     }, {
       multi: true
-    });
-  });
+    }
+  );
 };
 
 /*
