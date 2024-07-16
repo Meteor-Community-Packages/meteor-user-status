@@ -135,7 +135,7 @@ statusEvents.on('connectionActive', async (advice) => {
 // Reset online status on startup (users will reconnect)
 const onStartup = async (selector) => {
   if (selector == null) {
-    selector = Meteor?.settings?.packages?.['mizzao:user-status']?.startupQuerySelector || {};
+    selector = Meteor?.settings?.packages?.['mizzao:user-status']?.startupQuerySelector || { 'status.online': true };
   }
   return await Meteor.users.updateAsync(selector, {
     $set: {
@@ -145,8 +145,17 @@ const onStartup = async (selector) => {
       'status.idle': null,
       'status.lastActivity': null
     }
-  }, {
-    multi: true
+    return Meteor.users.update(selector, {
+      $set: {
+        'status.online': false
+      },
+      $unset: {
+        'status.idle': null,
+        'status.lastActivity': null
+      }
+    }, {
+      multi: true
+    });
   });
 };
 
