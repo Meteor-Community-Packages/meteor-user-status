@@ -27,7 +27,7 @@ const statusEvents = new (EventEmitter)();
   - "false" if user is online and idle
   - null if user is offline
 */
-statusEvents.on('connectionLogin', (advice) => {
+statusEvents.on('connectionLogin', async (advice) => {
   const update = {
     $set: {
       'status.online': true,
@@ -41,9 +41,9 @@ statusEvents.on('connectionLogin', (advice) => {
 
   // unless ALL existing connections are idle (including this new one),
   // the user connection becomes active.
-  const conns = UserConnections.find({
+  const conns = await UserConnections.find({
     userId: advice.userId
-  }).fetch();
+  }).fetchAsync();
   if (!conns.every(c => c.idle)) {
     update.$set['status.idle'] = false;
     update.$unset = {
@@ -52,17 +52,17 @@ statusEvents.on('connectionLogin', (advice) => {
   }
   // in other case, idle field remains true and no update to lastActivity.
 
-  Meteor.users.update(advice.userId, update);
+  Meteor.users.updateAsync(advice.userId, update);
 });
 
-statusEvents.on('connectionLogout', (advice) => {
-  const conns = UserConnections.find({
+statusEvents.on('connectionLogout', async (advice) => {
+  const conns = await UserConnections.find({
     userId: advice.userId
-  }).fetch();
+  }).fetchAsync();
   if (conns.length === 0) {
     // Go offline if we are the last connection for this user
     // This includes removing all idle information
-    Meteor.users.update(advice.userId, {
+    Meteor.users.updateAsync(advice.userId, {
       $set: {
         'status.online': false
       },
@@ -75,7 +75,7 @@ statusEvents.on('connectionLogout', (advice) => {
     /*
       All remaining connections are idle:
       - If the last active connection quit, then we should go idle with the most recent activity
- 
+
       - If an idle connection quit, nothing should happen; specifically, if the
         most recently active idle connection quit, we shouldn't tick the value backwards.
         This may result in a no-op so we can be smart and skip the update.
@@ -85,7 +85,7 @@ statusEvents.on('connectionLogout', (advice) => {
     } // The dropped connection was already idle
 
     const latestLastActivity = new Date(Math.max(...conns.map(conn => conn.lastActivity)));
-    Meteor.users.update(advice.userId, {
+    Meteor.users.updateAsync(advice.userId, {
       $set: {
         'status.idle': true,
         'status.lastActivity': latestLastActivity
@@ -101,10 +101,10 @@ statusEvents.on('connectionLogout', (advice) => {
   TODO: There is a race condition when switching between tabs, leaving the user inactive while idle goes from one tab to the other.
   It can probably be smoothed out.
 */
-statusEvents.on('connectionIdle', (advice) => {
-  const conns = UserConnections.find({
+statusEvents.on('connectionIdle', async (advice) => {
+  const conns = await UserConnections.find({
     userId: advice.userId
-  }).fetch();
+  }).fetchAsync();
   if (!conns.every(c => c.idle)) {
     return;
   }
@@ -113,7 +113,7 @@ statusEvents.on('connectionIdle', (advice) => {
 
   // TODO: the race happens here where everyone was idle when we looked for them but now one of them isn't.
   const latestLastActivity = new Date(Math.max(...conns.map(conn => conn.lastActivity)));
-  Meteor.users.update(advice.userId, {
+  Meteor.users.updateAsync(advice.userId, {
     $set: {
       'status.idle': true,
       'status.lastActivity': latestLastActivity
@@ -121,8 +121,8 @@ statusEvents.on('connectionIdle', (advice) => {
   });
 });
 
-statusEvents.on('connectionActive', (advice) => {
-  Meteor.users.update(advice.userId, {
+statusEvents.on('connectionActive', async (advice) => {
+  Meteor.users.updateAsync(advice.userId, {
     $set: {
       'status.idle': false
     },
@@ -133,10 +133,17 @@ statusEvents.on('connectionActive', (advice) => {
 });
 
 // Reset online status on startup (users will reconnect)
-const onStartup = (selector) => {
-  Meteor.defer(() => {
-    if (selector == null) {
-      selector = Meteor?.settings?.packages?.['mizzao:user-status']?.startupQuerySelector || { 'status.online': true };
+const onStartup = async (selector) => {
+  if (selector == null) {
+    selector = Meteor?.settings?.packages?.['mizzao:user-status']?.startupQuerySelector || { 'status.online': true };
+  }
+  return await Meteor.users.updateAsync(selector, {
+    $set: {
+      'status.online': false
+    },
+    $unset: {
+      'status.idle': null,
+      'status.lastActivity': null
     }
     return Meteor.users.update(selector, {
       $set: {
@@ -156,8 +163,8 @@ const onStartup = (selector) => {
   Local session modification functions - also used in testing
 */
 
-const addSession = (connection) => {
-  UserConnections.upsert(connection.id, {
+const addSession = async (connection) => {
+  UserConnections.upsertAsync(connection.id, {
     $set: {
       ipAddr: connection.clientAddress,
       userAgent: connection.httpHeaders['user-agent']
@@ -165,8 +172,8 @@ const addSession = (connection) => {
   });
 };
 
-const loginSession = (connection, date, userId) => {
-  UserConnections.upsert(connection.id, {
+const loginSession = async (connection, date, userId) => {
+  UserConnections.upsertAsync(connection.id, {
     $set: {
       userId,
       loginTime: date
@@ -183,9 +190,9 @@ const loginSession = (connection, date, userId) => {
 };
 
 // Possibly trigger a logout event if this connection was previously associated with a user ID
-const tryLogoutSession = (connection, date) => {
+const tryLogoutSession = async (connection, date) => {
   let conn;
-  if ((conn = UserConnections.findOne({
+  if ((conn = await UserConnections.findOneAsync({
     _id: connection.id,
     userId: {
       $exists: true
@@ -195,7 +202,7 @@ const tryLogoutSession = (connection, date) => {
   }
 
   // Yes, this is actually a user logging out.
-  UserConnections.upsert(connection.id, {
+  UserConnections.upsertAsync(connection.id, {
     $unset: {
       userId: null,
       loginTime: null
@@ -210,13 +217,13 @@ const tryLogoutSession = (connection, date) => {
   });
 };
 
-const removeSession = (connection, date) => {
-  tryLogoutSession(connection, date);
-  UserConnections.remove(connection.id);
+const removeSession = async (connection, date) => {
+  await tryLogoutSession(connection, date);
+  UserConnections.removeAsync(connection.id);
 };
 
-const idleSession = (connection, date, userId) => {
-  UserConnections.update(connection.id, {
+const idleSession = async (connection, date, userId) => {
+  UserConnections.updateAsync(connection.id, {
     $set: {
       idle: true,
       lastActivity: date
@@ -230,8 +237,8 @@ const idleSession = (connection, date, userId) => {
   });
 };
 
-const activeSession = (connection, date, userId) => {
-  UserConnections.update(connection.id, {
+const activeSession = async (connection, date, userId) => {
+  UserConnections.updateAsync(connection.id, {
     $set: {
       idle: false
     },
@@ -253,8 +260,8 @@ const activeSession = (connection, date, userId) => {
 Meteor.startup(onStartup);
 
 // Opening and closing of DDP connections
-Meteor.onConnection((connection) => {
-  addSession(connection);
+Meteor.onConnection(async (connection) => {
+  await addSession(connection);
 
   return connection.onClose(() => removeSession(connection, new Date()));
 });

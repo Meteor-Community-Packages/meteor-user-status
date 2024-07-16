@@ -1,9 +1,0 @@
-os:
-  - linux
-language: node_js
-node_js:
-  - "14.21.3"
-before_install:
-  - "curl -L http://git.io/ejPSng | /bin/sh"
-script:
-  - npm run test

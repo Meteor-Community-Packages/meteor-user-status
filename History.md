@@ -1,7 +1,10 @@
 ## vNEXT
 
-## v1.1.1
+## v2.0.0
 * Add newer Meteor versions to `versionsFrom`
+* Minimum Meteor version is 2.8.1
+* Updated for Meteor 3
+* Updated to eslint v9
 
 ## v1.1.0
 

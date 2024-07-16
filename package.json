@@ -17,12 +17,14 @@
     "publish": "meteor npm i && npm prune --production && meteor publish && meteor npm i"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.9",
-    "@babel/eslint-parser": "^7.23.10",
-    "autoprefixer": "^10.4.17",
-    "eslint": "^8.56.0",
-    "husky": "^8.0.3",
-    "mocha": "^10.2.0"
+    "@babel/core": "^7.24.9",
+    "@babel/eslint-parser": "^7.24.8",
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.7.0",
+    "autoprefixer": "^10.4.19",
+    "eslint": "^9.7.0",
+    "husky": "^9.0.11",
+    "mocha": "^10.6.0"
   },
   "husky": {
     "hooks": {
