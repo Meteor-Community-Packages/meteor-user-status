@@ -53,10 +53,10 @@ if (Meteor.isServer) {
     });
   }
 
-  Accounts.registerLoginHandler((options) => {
+  Accounts.registerLoginHandler(async (options) => {
     if (!options.username) return;
 
-    var user = Meteor.users.findOne({
+    var user = await Meteor.users.findOneAsync({
       'username': options.username
     });
     if (!user) return;

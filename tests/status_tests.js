@@ -38,12 +38,12 @@ const withCleanup = getCleanupWrapper({
     lastIdleAdvice = null;
     lastActiveAdvice = null;
 
-    Meteor.users.update(TEST_userId, {
+    Meteor.users.updateAsync(TEST_userId, {
       $unset: {
         status: null
       }
     });
-    UserStatus.connections.remove({
+    UserStatus.connections.removeAsync({
       $or: [{
           userId: TEST_userId
         },
@@ -60,12 +60,12 @@ const withCleanup = getCleanupWrapper({
 // Clean up before we add any tests just in case some crap left over from before
 withCleanup(function () {});
 
-Tinytest.add('status - adding anonymous session', withCleanup((test) => {
+Tinytest.add('status - adding anonymous session', withCleanup(async (test) => {
   const conn = randomConnection();
 
   StatusInternals.addSession(conn);
 
-  const doc = UserStatus.connections.findOne(conn.id);
+  const doc = await UserStatus.connections.findOneAsync(conn.id);
 
   test.isTrue(doc != null);
   test.equal(doc._id, conn.id);
@@ -84,15 +84,15 @@ Tinytest.add('status - adding and removing anonymous session', withCleanup((test
   return test.isFalse(UserStatus.connections.findOne(conn.id));
 }));
 
-Tinytest.add('status - adding one authenticated session', withCleanup((test) => {
+Tinytest.add('status - adding one authenticated session', withCleanup(async(test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
   StatusInternals.addSession(conn);
   StatusInternals.loginSession(conn, ts, TEST_userId);
 
-  const doc = UserStatus.connections.findOne(conn.id);
-  const user = Meteor.users.findOne(TEST_userId);
+  const doc = await UserStatus.connections.findOneAsync(conn.id);
+  const user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.isTrue(doc != null);
   test.equal(doc._id, conn.id);
@@ -113,7 +113,7 @@ Tinytest.add('status - adding one authenticated session', withCleanup((test) => 
   return test.equal(user.status.lastLogin.userAgent, TEST_UA);
 }));
 
-Tinytest.add('status - adding and removing one authenticated session', withCleanup((test) => {
+Tinytest.add('status - adding and removing one authenticated session', withCleanup(async(test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
@@ -123,8 +123,8 @@ Tinytest.add('status - adding and removing one authenticated session', withClean
   const logoutTime = delayedDate();
   StatusInternals.removeSession(conn, logoutTime);
 
-  const doc = UserStatus.connections.findOne(conn.id);
-  const user = Meteor.users.findOne(TEST_userId);
+  const doc = UserStatus.connections.findOneAsync(conn.id);
+  const user = Meteor.users.findOneAsync(TEST_userId);
 
   test.isFalse(doc != null);
 
@@ -170,7 +170,7 @@ Tinytest.add('status - logout and then close one authenticated session', withCle
   return test.equal(user.status.lastLogin.date, ts);
 }));
 
-Tinytest.add('status - idling one authenticated session', withCleanup((test) => {
+Tinytest.add('status - idling one authenticated session', withCleanup(async(test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
@@ -181,8 +181,8 @@ Tinytest.add('status - idling one authenticated session', withCleanup((test) => 
 
   StatusInternals.idleSession(conn, idleTime, TEST_userId);
 
-  const doc = UserStatus.connections.findOne(conn.id);
-  const user = Meteor.users.findOne(TEST_userId);
+  const doc = await UserStatus.connections.findOneAsync(conn.id);
+  const user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.isTrue(doc != null);
   test.equal(doc._id, conn.id);
@@ -203,7 +203,7 @@ Tinytest.add('status - idling one authenticated session', withCleanup((test) => 
   return test.equal(user.status.lastActivity, idleTime);
 }));
 
-Tinytest.add('status - idling and reactivating one authenticated session', withCleanup((test) => {
+Tinytest.add('status - idling and reactivating one authenticated session', withCleanup(async(test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
@@ -215,8 +215,8 @@ Tinytest.add('status - idling and reactivating one authenticated session', withC
   const activeTime = delayedDate();
   StatusInternals.activeSession(conn, activeTime, TEST_userId);
 
-  const doc = UserStatus.connections.findOne(conn.id);
-  const user = Meteor.users.findOne(TEST_userId);
+  const doc = await UserStatus.connections.findOneAsync(conn.id);
+  const user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.isTrue(doc != null);
   test.equal(doc._id, conn.id);
@@ -237,7 +237,7 @@ Tinytest.add('status - idling and reactivating one authenticated session', withC
   return test.isFalse(user.status.lastActivity != null);
 }));
 
-Tinytest.add('status - idling and removing one authenticated session', withCleanup((test) => {
+Tinytest.add('status - idling and removing one authenticated session', withCleanup(async(test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
@@ -248,8 +248,8 @@ Tinytest.add('status - idling and removing one authenticated session', withClean
   const logoutTime = delayedDate();
   StatusInternals.removeSession(conn, logoutTime);
 
-  const doc = UserStatus.connections.findOne(conn.id);
-  const user = Meteor.users.findOne(TEST_userId);
+  const doc = await UserStatus.connections.findOneAsync(conn.id);
+  const user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.isFalse(doc != null);
 
@@ -262,7 +262,7 @@ Tinytest.add('status - idling and removing one authenticated session', withClean
   return test.equal(user.status.lastLogin.date, ts);
 }));
 
-Tinytest.add('status - idling and reconnecting one authenticated session', withCleanup((test) => {
+Tinytest.add('status - idling and reconnecting one authenticated session', withCleanup(async(test) => {
   const conn = randomConnection();
   const ts = delayedDate();
 
@@ -283,8 +283,8 @@ Tinytest.add('status - idling and reconnecting one authenticated session', withC
   StatusInternals.loginSession(reconn, reconnTime, TEST_userId);
   StatusInternals.idleSession(reconn, idleTime, TEST_userId);
 
-  const doc = UserStatus.connections.findOne(reconn.id);
-  const user = Meteor.users.findOne(TEST_userId);
+  const doc = await UserStatus.connections.findOneAsync(reconn.id);
+  const user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.isTrue(doc != null);
   test.equal(doc._id, reconn.id);
@@ -301,7 +301,7 @@ Tinytest.add('status - idling and reconnecting one authenticated session', withC
   return test.equal(user.status.lastActivity, idleTime);
 }));
 
-Tinytest.add('multiplex - two online sessions', withCleanup((test) => {
+Tinytest.add('multiplex - two online sessions', withCleanup(async (test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -315,13 +315,13 @@ Tinytest.add('multiplex - two online sessions', withCleanup((test) => {
   StatusInternals.addSession(conn2);
   StatusInternals.loginSession(conn2, ts2, TEST_userId);
 
-  const user = Meteor.users.findOne(TEST_userId);
+  const user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.equal(user.status.online, true);
   return test.equal(user.status.lastLogin.date, ts2);
 }));
 
-Tinytest.add('multiplex - two online sessions with one going offline', withCleanup((test) => {
+Tinytest.add('multiplex - two online sessions with one going offline', withCleanup(async (test) => {
   let user;
   const conn = randomConnection();
 
@@ -338,13 +338,13 @@ Tinytest.add('multiplex - two online sessions with one going offline', withClean
 
   StatusInternals.removeSession(conn, delayedDate(),
 
-    (user = Meteor.users.findOne(TEST_userId)));
+    (user = await Meteor.users.findOneAsync(TEST_userId)));
 
   test.equal(user.status.online, true);
   return test.equal(user.status.lastLogin.date, ts2);
 }));
 
-Tinytest.add('multiplex - two online sessions to offline', withCleanup((test) => {
+Tinytest.add('multiplex - two online sessions to offline', withCleanup(async (test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -361,13 +361,13 @@ Tinytest.add('multiplex - two online sessions to offline', withCleanup((test) =>
   StatusInternals.removeSession(conn, delayedDate());
   StatusInternals.removeSession(conn2, delayedDate());
 
-  const user = Meteor.users.findOne(TEST_userId);
+  const user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.equal(user.status.online, false);
   return test.equal(user.status.lastLogin.date, ts2);
 }));
 
-Tinytest.add('multiplex - idling one of two online sessions', withCleanup((test) => {
+Tinytest.add('multiplex - idling one of two online sessions', withCleanup(async (test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -384,14 +384,14 @@ Tinytest.add('multiplex - idling one of two online sessions', withCleanup((test)
   const idle1 = delayedDate();
   StatusInternals.idleSession(conn, idle1, TEST_userId);
 
-  const user = Meteor.users.findOne(TEST_userId);
+  const user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.equal(user.status.online, true);
   test.equal(user.status.lastLogin.date, ts2);
   return test.equal(user.status.idle, false);
 }));
 
-Tinytest.add('multiplex - idling two online sessions', withCleanup((test) => {
+Tinytest.add('multiplex - idling two online sessions', withCleanup(async (test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -410,7 +410,7 @@ Tinytest.add('multiplex - idling two online sessions', withCleanup((test) => {
   StatusInternals.idleSession(conn, idle1, TEST_userId);
   StatusInternals.idleSession(conn2, idle2, TEST_userId);
 
-  const user = Meteor.users.findOne(TEST_userId);
+  const user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.equal(user.status.online, true);
   test.equal(user.status.lastLogin.date, ts2);
@@ -418,7 +418,7 @@ Tinytest.add('multiplex - idling two online sessions', withCleanup((test) => {
   return test.equal(user.status.lastActivity, idle2);
 }));
 
-Tinytest.add('multiplex - idling two then reactivating one session', withCleanup((test) => {
+Tinytest.add('multiplex - idling two then reactivating one session', withCleanup(async (test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -439,7 +439,7 @@ Tinytest.add('multiplex - idling two then reactivating one session', withCleanup
 
   StatusInternals.activeSession(conn, delayedDate(), TEST_userId);
 
-  const user = Meteor.users.findOne(TEST_userId);
+  const user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.equal(user.status.online, true);
   test.equal(user.status.lastLogin.date, ts2);
@@ -447,7 +447,7 @@ Tinytest.add('multiplex - idling two then reactivating one session', withCleanup
   return test.isFalse(user.status.lastActivity != null);
 }));
 
-Tinytest.add('multiplex - logging in while an existing session is idle', withCleanup((test) => {
+Tinytest.add('multiplex - logging in while an existing session is idle', withCleanup(async (test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -464,7 +464,7 @@ Tinytest.add('multiplex - logging in while an existing session is idle', withCle
   StatusInternals.addSession(conn2);
   StatusInternals.loginSession(conn2, ts2, TEST_userId);
 
-  const user = Meteor.users.findOne(TEST_userId);
+  const user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.equal(user.status.online, true);
   test.equal(user.status.lastLogin.date, ts2);
@@ -472,7 +472,7 @@ Tinytest.add('multiplex - logging in while an existing session is idle', withCle
   return test.isFalse(user.status.lastActivity != null);
 }));
 
-Tinytest.add('multiplex - simulate tab switch', withCleanup((test) => {
+Tinytest.add('multiplex - simulate tab switch', withCleanup(async (test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -496,7 +496,7 @@ Tinytest.add('multiplex - simulate tab switch', withCleanup((test) => {
   // go back to first tab
   StatusInternals.activeSession(conn, delayedDate(), TEST_userId);
 
-  const user = Meteor.users.findOne(TEST_userId);
+  const user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.equal(user.status.online, true);
   test.equal(user.status.lastLogin.date, ts2);
@@ -505,7 +505,7 @@ Tinytest.add('multiplex - simulate tab switch', withCleanup((test) => {
 }));
 
 // Test for idling one session across a disconnection; not most recent idle time
-Tinytest.add('multiplex - disconnection and reconnection while idle', withCleanup((test) => {
+Tinytest.add('multiplex - disconnection and reconnection while idle', withCleanup(async (test) => {
   const conn = randomConnection();
 
   const conn2 = randomConnection();
@@ -527,7 +527,7 @@ Tinytest.add('multiplex - disconnection and reconnection while idle', withCleanu
   // Second session, which connected later, reconnects but remains idle
   StatusInternals.removeSession(conn2, delayedDate(), TEST_userId);
 
-  let user = Meteor.users.findOne(TEST_userId);
+  let user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.equal(user.status.online, true);
   test.equal(user.status.lastLogin.date, ts2);
@@ -542,7 +542,7 @@ Tinytest.add('multiplex - disconnection and reconnection while idle', withCleanu
 
   StatusInternals.idleSession(reconn2, idle2, TEST_userId);
 
-  user = Meteor.users.findOne(TEST_userId);
+  user = await Meteor.users.findOneAsync(TEST_userId);
 
   test.equal(user.status.online, true);
   test.equal(user.status.lastLogin.date, ts3);
@@ -550,11 +550,11 @@ Tinytest.add('multiplex - disconnection and reconnection while idle', withCleanu
   return test.equal(user.status.lastActivity, idle2);
 }));
 
-Tinytest.add('status - user online set to false on startup', withCleanup((test) => {
+Tinytest.add('status - user online set to false on startup', withCleanup(async (test) => {
   // special argument to onStartup prevents this from affecting client tests
   StatusInternals.onStartup(TEST_userId);
 
-  const userAfterStartup = Meteor.users.findOne(TEST_userId);
+  const userAfterStartup = await Meteor.users.findOneAsync(TEST_userId);
   // Check reset status
   test.equal(userAfterStartup.status.online, false);
   test.equal(userAfterStartup.status.idle, undefined);
@@ -567,14 +567,14 @@ Tinytest.add('status - user online set to false on startup', withCleanup((test) 
   StatusInternals.addSession(conn);
   StatusInternals.loginSession(conn, ts, TEST_userId);
 
-  const userAfterLogin = Meteor.users.findOne(TEST_userId);
+  const userAfterLogin = await Meteor.users.findOneAsync(TEST_userId);
 
   test.equal(userAfterLogin.status.online, true);
   test.isFalse(userAfterLogin.status.idle);
 
   StatusInternals.onStartup(TEST_userId);
 
-  const userAfterRestart = Meteor.users.findOne(TEST_userId);
+  const userAfterRestart = await Meteor.users.findOneAsync(TEST_userId);
   // Check reset status again
   test.equal(userAfterRestart.status.online, false);
   test.equal(userAfterRestart.status.idle, undefined);

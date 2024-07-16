@@ -6,12 +6,12 @@ export let TEST_userId = '';
 export const TEST_IP = '255.255.255.0';
 
 if (Meteor.isServer) {
-  const testUserExists = Meteor.users.findOne({
+  const testUserExists = await Meteor.users.findOneAsync({
     username: TEST_username
   });
 
   if (!testUserExists) {
-    TEST_userId = Meteor.users.insert({
+    TEST_userId = await Meteor.users.insertAsync({
       username: TEST_username
     });
     console.log('Inserted test user id: ', TEST_userId);
