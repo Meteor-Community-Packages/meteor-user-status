@@ -16,6 +16,7 @@
 ## v1.0.0
 
 * Decaffeinated!
+* BREAKING: User status now needs to be properly imported: `import { UserStatus } from 'meteor/mizzao:user-status'`
 * Added ESLint and jsbeautify
 * Added husky for pre-commit lint checking
 * Don't try to stop monitor in testing if it's not started
