@@ -3,12 +3,12 @@
 Package.describe({
   name: 'mizzao:user-status',
   summary: 'User connection and idle state tracking for Meteor',
-  version: '2.0.0-beta.1',
+  version: '2.0.0-rc.1',
   git: 'https://github.com/Meteor-Community-Packages/meteor-user-status.git'
 });
 
 Package.onUse((api) => {
-  api.versionsFrom(['2.8.1', '2.15', '3.0-rc.4']);
+  api.versionsFrom(['2.8.1', '2.15', '3.0']);
 
   api.use('ecmascript');
   api.use('accounts-base');
