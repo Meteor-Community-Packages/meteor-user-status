@@ -65,11 +65,11 @@ export const MonitorInternals = {
   },
 
   reportIdle(time) {
-    return Meteor.call('user-status-idle', time);
+    return Meteor.callAsync('user-status-idle', time);
   },
 
   reportActive(time) {
-    return Meteor.call('user-status-active', time);
+    return Meteor.callAsync('user-status-active', time);
   }
 
 };
