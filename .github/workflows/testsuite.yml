@@ -1,4 +1,4 @@
-# the test suite runs the tests (headless, server+client) for multiple Meteor releases
+# the test suite runs the tests (headless, server+client) for Meteor 3
 name: Test suite
 on:
   push:
@@ -13,7 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         meteorRelease:
-          - "--release 2.16"
           - "--release 3.0"
     steps:
       - name: Checkout code

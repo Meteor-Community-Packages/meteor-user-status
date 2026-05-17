@@ -26,9 +26,9 @@ $ meteor add mizzao:user-status
 
 ### Compatibility
 
-The `2.0.0-rc.3` release candidate supports Meteor 2.16 and Meteor 3.0. It is
-intended as a bridge release so applications can update this package while still
-on Meteor 2.x, then migrate the application to Meteor 3.
+The `2.0.0` release candidates target Meteor 3.0 and newer, and use the stable
+`mizzao:timesync@1.0.0` package. Meteor 2.x applications should stay on the
+`1.x` line of this package until the application is ready to migrate to Meteor 3.
 
 Additionally, note that to read client IP addresses properly, you must set the
 `HTTP_FORWARDED_COUNT` environment variable for your app, and make sure that IP
