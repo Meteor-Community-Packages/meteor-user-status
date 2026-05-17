@@ -14,15 +14,18 @@ In order to `meteor publish`, you will need to be added as a maintainer to this 
 meteor admin maintainers mizzao:user-status --list
 ```
 
-# Travis CI
+# GitHub Actions
 
-To be written.
+Continuous integration runs with GitHub Actions:
 
-See https://travis-ci.org/Meteor-Community-Packages/meteor-user-status
+- lint checks run in `.github/workflows/lint.yml`
+- package tests run in `.github/workflows/testsuite.yml`
+- CodeQL analysis runs in `.github/workflows/codeql.yml`
+
+See https://github.com/Meteor-Community-Packages/meteor-user-status/actions
 
 # Pushing a demo
 
 To be written.
 
 We host the demo at https://user-status.meteorapp.com.
-

@@ -48,7 +48,7 @@ Tinytest.addAsync('status - session recorded on server', (test, next) => Meteor.
   test.isTrue(doc.ipAddr != null);
   test.isTrue(Math.abs(doc.loginTime - loginTime) < timeTol);
 
-  // This shit doesn't seem to work properly in PhantomJS on Travis
+  // This does not seem to work properly in headless browser test runs.
   if (Package['test-in-console'] == null) {
     test.equal(doc.userAgent, navigator.userAgent);
   }
