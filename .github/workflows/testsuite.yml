@@ -10,12 +10,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         meteorRelease:
-          - "--release 2.8.1"
-          - "--release 2.15"
+          - "--release 2.16"
           - "--release 3.0"
-          # Latest version
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

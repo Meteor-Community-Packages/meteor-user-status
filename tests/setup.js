@@ -1,24 +1,24 @@
-/* eslint-disable no-useless-catch */
 import { Meteor } from 'meteor/meteor';
 
 export const TEST_username = 'status_test';
-export let TEST_userId = '';
+export const TEST_userId = 'status_test_user';
 export const TEST_IP = '255.255.255.0';
 
-if (Meteor.isServer) {
-  const testUserExists = await Meteor.users.findOneAsync({
-    username: TEST_username
-  });
+export const ensureTestUser = async () => {
+  if (!Meteor.isServer) {
+    return;
+  }
+
+  const testUserExists = await Meteor.users.findOneAsync(TEST_userId);
 
   if (!testUserExists) {
-    TEST_userId = await Meteor.users.insertAsync({
+    await Meteor.users.insertAsync({
+      _id: TEST_userId,
       username: TEST_username
     });
     console.log('Inserted test user id: ', TEST_userId);
-  } else {
-    TEST_userId = testUserExists._id;
   }
-}
+};
 
 // Get a wrapper that runs a before and after function wrapping some test function.
 export const getCleanupWrapper = function (settings) {
@@ -28,30 +28,56 @@ export const getCleanupWrapper = function (settings) {
   return fn => // Return a function that, when called, executes the hooks around the function.
     (function () {
       const next = arguments[1];
-      if (typeof before === 'function') {
-        before();
+      const test = arguments[0];
+      const runBefore = () => (typeof before === 'function') ? before() : undefined;
+      const runAfter = () => (typeof after === 'function') ? after() : undefined;
+      const fail = (error) => {
+        if (typeof (test != null ? test.fail : undefined) === 'function') {
+          test.fail(error != null && error.stack ? error.stack : error);
+        } else {
+          throw error;
+        }
+      };
+
+      const finish = () => Promise.resolve(runAfter()).then(() => next());
+
+      if (typeof next === 'function') {
+        // Asynchronous version - Tinytest.addAsync
+        const handleError = error => Promise.resolve(runAfter()).then(() => {
+          fail(error);
+          next();
+        });
+        const run = () => {
+          try {
+            const result = fn.call(this, test, finish);
+            if (result != null && typeof result.then === 'function') {
+              result.then(finish).catch(handleError);
+            }
+          } catch (error) {
+            handleError(error);
+          }
+        };
+
+        try {
+          const beforeResult = runBefore();
+          if (beforeResult != null && typeof beforeResult.then === 'function') {
+            beforeResult.then(run).catch(handleError);
+          } else {
+            run();
+          }
+        } catch (error) {
+          handleError(error);
+        }
+
+        return;
       }
 
-      if (next == null) {
-        // Synchronous version - Tinytest.add
-        try {
-          return fn.apply(this, arguments);
-        } catch (error) {
-          throw error;
-        } finally {
-          if (typeof after === 'function') {
-            after();
-          }
-        }
-      } else {
-        // Asynchronous version - Tinytest.addAsync
-        const hookedNext = function () {
-          if (typeof after === 'function') {
-            after();
-          }
-          return next();
-        };
-        return fn.call(this, arguments[0], hookedNext);
+      // Synchronous version - Tinytest.add
+      runBefore();
+      try {
+        return fn.apply(this, arguments);
+      } finally {
+        runAfter();
       }
     });
 };

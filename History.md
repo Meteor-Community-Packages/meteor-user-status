@@ -2,10 +2,12 @@
 
 ## v2.0.0
 * Add newer Meteor versions to `versionsFrom`
-* Minimum Meteor version is 2.8.1
+* Minimum Meteor version is 2.16
 * onStartup add defer and default query [PR](https://github.com/Meteor-Community-Packages/meteor-user-status/pull/163) [@Sergeant61](https://github.com/Sergeant61)
-* Updated for Meteor 3
+* Completed async/Fibers compatibility work for Meteor 3
 * Updated to eslint v9
+* Updated `mizzao:timesync` compatibility to support Meteor 2.16 and 3.0
+* Published release candidate `2.0.0-rc.3`
 
 ## v1.1.0
 
