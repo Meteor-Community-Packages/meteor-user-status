@@ -3,7 +3,7 @@
 Package.describe({
   name: 'mizzao:user-status',
   summary: 'User connection and idle state tracking for Meteor',
-  version: '2.0.0-rc.4',
+  version: '2.0.0',
   git: 'https://github.com/Meteor-Community-Packages/meteor-user-status.git'
 });
 
