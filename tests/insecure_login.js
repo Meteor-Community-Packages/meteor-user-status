@@ -40,24 +40,28 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
-  if (!Meteor.users.find({
-      'username': 'InsecureLogin'
-    }).count()) {
-    Accounts.createUser({
-      username: 'InsecureLogin',
-      email: 'test@test.com',
-      password: 'password',
-      profile: {
-        name: 'InsecureLogin'
-      }
+  Meteor.startup(async () => {
+    const existingUser = await Meteor.users.findOneAsync({
+      username: 'InsecureLogin'
     });
-  }
 
-  Accounts.registerLoginHandler((options) => {
+    if (!existingUser) {
+      await Accounts.createUserAsync({
+        username: 'InsecureLogin',
+        email: 'test@test.com',
+        password: 'password',
+        profile: {
+          name: 'InsecureLogin'
+        }
+      });
+    }
+  });
+
+  Accounts.registerLoginHandler(async (options) => {
     if (!options.username) return;
 
-    var user = Meteor.users.findOne({
-      'username': options.username
+    const user = await Meteor.users.findOneAsync({
+      username: options.username
     });
     if (!user) return;
 

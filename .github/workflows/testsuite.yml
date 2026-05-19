@@ -1,4 +1,4 @@
-# the test suite runs the tests (headless, server+client) for multiple Meteor releases
+# the test suite runs the tests (headless, server+client) for Meteor 3
 name: Test suite
 on:
   push:
@@ -10,12 +10,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         meteorRelease:
-          - "--release 2.7"
-          - "--release 2.8.1"
-          - "--release 2.15"
-          # Latest version
+          - "--release 3.0"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,7 +21,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "14.x"
+          node-version: "20.x"
 
       - name: Install Dependencies
         run: |

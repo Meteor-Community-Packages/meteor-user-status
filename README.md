@@ -24,6 +24,12 @@ Install using Meteor:
 $ meteor add mizzao:user-status
 ```
 
+### Compatibility
+
+The `2.0.0` release candidates target Meteor 3.0 and newer, and use the stable
+`mizzao:timesync@1.0.0` package. Meteor 2.x applications should stay on the
+`1.x` line of this package until the application is ready to migrate to Meteor 3.
+
 Additionally, note that to read client IP addresses properly, you must set the
 `HTTP_FORWARDED_COUNT` environment variable for your app, and make sure that IP
 address headers are forwarded for any reverse proxy installed in front of the
@@ -117,7 +123,9 @@ The `UserStatus.connections` (in-memory) collection contains information for all
 
 #### startupQuerySelector (Optional)
 
-On startup `meteor-user-status` automatically resets all users to `offline` and then marks each `online` as connections are reestablished. 
+On startup `meteor-user-status` automatically resets online users to `offline`
+using the default selector `{ "status.online": true }`, then marks users
+`online` again as connections are reestablished.
 
 To customize this functionality you can use the `startupQuerySelector` [Meteor package option](https://docs.meteor.com/api/packagejs.html#options) like this:
 ```javascript
@@ -199,8 +207,9 @@ The `UserStatus.events` object is an `EventEmitter` on which you can listen for 
 Check out https://github.com/mizzao/meteor-accounts-testing for a simple accounts drop-in that you can use to test your app - this is also used in the demo.
 
 #### Startup selector
-By default, the startup selector for resetting user status is `{}`.
-If you want to change that you can set the default selector in your settings.json file:
+By default, the startup selector for resetting user status is
+`{ "status.online": true }`. If you want to change that you can set the default
+selector in your settings.json file:
 
 ```json
 {

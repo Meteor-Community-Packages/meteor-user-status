@@ -1,7 +1,15 @@
 ## vNEXT
 
-## v1.1.1
+## v2.0.0
 * Add newer Meteor versions to `versionsFrom`
+* Minimum Meteor version is 3.0
+* onStartup add defer and default query [PR](https://github.com/Meteor-Community-Packages/meteor-user-status/pull/163) [@Sergeant61](https://github.com/Sergeant61)
+* Completed async/Fibers compatibility work for Meteor 3
+* Updated to eslint v9
+* Updated `mizzao:timesync` compatibility to use the stable Meteor 3 `1.0.0` release
+* Published release candidate `2.0.0-rc.3`
+* Published release candidate `2.0.0-rc.4` targeting Meteor 3 only
+* Removed remaining legacy CI documentation and completed the move to GitHub Actions
 
 ## v1.1.0
 
@@ -24,7 +32,7 @@
 * Upgraded timesync to 0.5.1
 * Formatted all JS, CSS, and HTML files to jsbeautify specs
 * Updated all references of github.com/mizzao to github.com/Meteor-Community-Packages
-* Changed TravisCI to use Node 8.15.1 and added lint checks
+* Updated CI to use Node 8.15.1 and added lint checks
 * Added Visual Studio Code settings.json
 * Changed all tabs to 2 spaces
 * Minimum meteor requirement now 1.7.0.5
